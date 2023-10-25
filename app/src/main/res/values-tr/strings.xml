@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pin Authentication</string>
+
+    <string name="status_text">Mevcut durum: %s</string>
+    <string name="create_pin_code">Pin Kodu Oluştur</string>
+    <string name="validate_pin_code">Pin Kodunu Doğrula</string>
+    <string name="change_pin_code">Pin Kodunu Değiştir</string>
+    <string name="delete_pin_code">Pin Kodunu Sil</string>
+    <string name="pin_code_created">Pin Kodu Oluşturuldu</string>
+    <string name="pin_code_not_created">Pin Kodu Oluşturulmadı</string>
+</resources>

@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Pin Authentication</string>
+
+    <string name="status_text">Текущий статус: %s</string>
+    <string name="create_pin_code">Создать Pin-код</string>
+    <string name="validate_pin_code">Валидировать Pin-код</string>
+    <string name="change_pin_code">Изменить Pin-код</string>
+    <string name="delete_pin_code">Удалить Pin-код</string>
+    <string name="pin_code_created">Pin-код создан</string>
+    <string name="pin_code_not_created">Pin-код не создан</string>
+</resources>

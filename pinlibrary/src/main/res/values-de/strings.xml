@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_code_forgot_text">PIN vergessen?</string>
+    <string name="pin_code_step_disable">%d-stellige PIN deaktivieren</string>
+    <string name="pin_code_step_create">Erstellen Sie einen PIN-Code</string>
+    <string name="pin_code_step_change">PIN eingeben</string>
+    <string name="pin_code_step_unlock">PIN eingeben</string>
+    <string name="pin_code_step_enable_confirm">Bestätigen Sie Ihre PIN</string>
+    <string name="pin_code_fingerprint_text">Fingerabdruck</string>
+    <string name="pin_code_fingerprint_success">Fingerabdruck akzeptiert</string>
+    <string name="pin_code_fingerprint_not_recognized">Fingerabdruck nicht erkannt. Versuchen Sie es erneut.</string>
+    <string name="pin_code_attempts">Falsche PIN. Versuche übrig: %1$d</string>
+    <string name="pin_codes_do_not_match">PIN-Codes stimmen nicht überein</string>
+    <string name="password_successfully_saved">Passwort erfolgreich gespeichert</string>
+
+    <string name="authorization">Authentifizierung</string>
+    <string name="use_biometry">Verwenden Sie die Biometrie zur Authentifizierung</string>
+    <string name="confirm_identity">Bestätigen Sie Ihre Identität</string>
+    <string name="cancel_action">Abbrechen</string>
+
+    <string name="forgot_pin">PIN vergessen?</string>
+    <string name="forgot_pin_instruction">Wenn Sie Ihren PIN vergessen haben, können Sie ihn durch erneute Authentifizierung zurücksetzen</string>
+    <string name="ok_button">OK</string>
+</resources>

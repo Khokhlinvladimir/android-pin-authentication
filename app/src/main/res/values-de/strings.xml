@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pin Authentication</string>
+
+    <string name="status_text">Aktueller Status: %s</string>
+    <string name="create_pin_code">PIN-Code erstellen</string>
+    <string name="validate_pin_code">PIN-Code überprüfen</string>
+    <string name="change_pin_code">PIN-Code ändern</string>
+    <string name="delete_pin_code">PIN-Code löschen</string>
+    <string name="pin_code_created">PIN-Code erstellt</string>
+    <string name="pin_code_not_created">PIN-Code nicht erstellt</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_code_forgot_text">PIN\'ı unuttunuz mu?</string>
+    <string name="pin_code_step_disable">%d haneli PIN\'i devre dışı bırak</string>
+    <string name="pin_code_step_create">Bir PIN kodu oluşturun</string>
+    <string name="pin_code_step_change">PIN girin</string>
+    <string name="pin_code_step_unlock">PIN girin</string>
+    <string name="pin_code_step_enable_confirm">PIN\'inizi onaylayın</string>
+    <string name="pin_code_fingerprint_text">Parmak izi</string>
+    <string name="pin_code_fingerprint_success">Parmak izi kabul edildi</string>
+    <string name="pin_code_fingerprint_not_recognized">Parmak izi tanınmadı. Tekrar deneyin.</string>
+    <string name="pin_code_attempts">Yanlış PIN. Kalan deneme sayısı: %1$d</string>
+    <string name="pin_codes_do_not_match">PIN kodları uyuşmuyor</string>
+    <string name="password_successfully_saved">Parola başarıyla kaydedildi</string>
+
+    <string name="authorization">Yetkilendirme</string>
+    <string name="use_biometry">Yetkilendirme için biyometriyi kullanın</string>
+    <string name="confirm_identity">Kimliğinizi doğrulayın</string>
+    <string name="cancel_action">İptal</string>
+
+    <string name="forgot_pin">PIN\'ı unuttunuz mu?</string>
+    <string name="forgot_pin_instruction">PIN kodunuzu unuttuysanız, yeniden yetkilendirme yaparak sıfırlayabilirsiniz</string>
+    <string name="ok_button">Tamam</string>
+</resources>

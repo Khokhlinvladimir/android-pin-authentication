@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pin_code_forgot_text">Forgot?</string>
+    <string name="pin_code_step_disable">Disable Pincode</string>
+    <string name="pin_code_step_create">Create a PIN code</string>
+    <string name="pin_code_step_change">Enter Pincode</string>
+    <string name="pin_code_step_unlock">Enter Pincode</string>
+    <string name="pin_code_step_enable_confirm">Confirm Pincode</string>
+    <string name="pin_code_fingerprint_text">Fingerprint</string>
+    <string name="pin_code_fingerprint_success">Fingerprint recognized</string>
+    <string name="pin_code_fingerprint_not_recognized">Fingerprint not recognized. Try again</string>
+    <string name="pin_code_attempts">Incorrect PIN. Attempts left: %1$d</string>
+    <string name="pin_codes_do_not_match">PIN codes do not match</string>
+    <string name="password_successfully_saved">Password successfully saved</string>
+
+    <string name="authorization">Authorization</string>
+    <string name="use_biometry">Use biometrics for authorization</string>
+    <string name="confirm_identity">Confirm your identity</string>
+    <string name="cancel_action">Cancel</string>
+
+    <string name="forgot_pin">Forgot PIN?</string>
+    <string name="forgot_pin_instruction">If you forgot your PIN, you can reset it by re-authenticating</string>
+    <string name="ok_button">OK</string>
+</resources>

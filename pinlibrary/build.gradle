@@ -62,7 +62,8 @@ afterEvaluate {
         }
         repositories {
             maven {
-                mavenLocal()
+                name = "JitPack"
+                url = uri("https://jitpack.io")
             }
         }
     }

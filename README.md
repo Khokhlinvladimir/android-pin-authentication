@@ -2,6 +2,8 @@
 
 [![](https://jitpack.io/v/Khokhlinvladimir/android-pin-authentication.svg)](https://jitpack.io/#Khokhlinvladimir/android-pin-authentication)
 
+[Версия на русском языке](https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/README_RU.md)
+
 ## Description
 
 Library for user authentication using PIN code. This library provides convenient and secure ways to verify users' identities using a simple numeric PIN. It can be used by developers when creating applications that require an additional layer of security or user authentication.

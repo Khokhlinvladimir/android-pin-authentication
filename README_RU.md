@@ -28,7 +28,7 @@
 
 ```gradle
 dependencies {
-   implementation 'com.github.Khokhlinvladimir:android-pin-authentication:1.0.0'
+   implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v1.0.1'
 }
 ```
 С этим простым шагом, вы включите мощный инструмент аутентификации в вашем приложении, делая его надежным и безопасным.

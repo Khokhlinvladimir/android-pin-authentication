@@ -57,7 +57,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.android.pinlibrary'
                 artifactId = 'pinlibrary'
-                version = '1.0.3'
+                version = '1.0.0'
             }
         }
         repositories {
@@ -67,9 +67,6 @@ afterEvaluate {
         }
     }
 }
-
-
-
 
 dependencies {
     // AndroidX Core и Kotlin Extensions

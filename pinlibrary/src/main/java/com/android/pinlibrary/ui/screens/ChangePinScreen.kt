@@ -39,7 +39,6 @@ fun ChangePinScreen(
     var isPinEntering by remember { mutableStateOf(false) }
     var isNewPinEntering by remember { mutableStateOf(false) }
 
-
     if (!isInitScenario) {
         viewModel.processIntent(ChangePinScreenIntent.InitialState)
         isInitScenario = true

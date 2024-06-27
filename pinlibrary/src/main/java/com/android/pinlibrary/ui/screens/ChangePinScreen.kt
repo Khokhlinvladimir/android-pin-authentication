@@ -1,6 +1,5 @@
 package com.android.pinlibrary.ui.screens
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -60,7 +59,6 @@ fun ChangePinScreen(
                 notification = stringResource(id = R.string.empty)
             } else {
                 if (!isError) {
-                    Log.d("TAG", "PinCodeUi decrementAttempts")
                     attemptCounter.decrementAttempts()
                     notification = stringResource(
                         id = R.string.pin_code_attempts,

@@ -10,10 +10,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.android.pinlibrary.R
 import com.android.pinlibrary.utils.state.PinCodeStateManager
 
 @Composable
@@ -37,6 +39,8 @@ fun PinCodeScreenForgot(
     )
 
     ShowDialog(
+        title = stringResource(id = R.string.forgot_pin),
+        description = stringResource(id = R.string.forgot_pin_instruction),
         showDialog = showDialog,
         pinCodeStateManager = pinCodeStateManager,
         onDismiss = {

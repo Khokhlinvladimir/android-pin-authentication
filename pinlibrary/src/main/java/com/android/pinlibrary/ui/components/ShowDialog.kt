@@ -10,6 +10,8 @@ import com.android.pinlibrary.utils.state.PinCodeStateManager
 
 @Composable
 fun ShowDialog(
+    title: String,
+    description: String,
     showDialog: Boolean,
     pinCodeStateManager: PinCodeStateManager,
     onDismiss: () -> Unit
@@ -18,10 +20,10 @@ fun ShowDialog(
         AlertDialog(
             onDismissRequest = { onDismiss() },
             title = {
-                Text(text = stringResource(id = R.string.forgot_pin))
+                Text(text = title)
             },
             text = {
-                Text(text = stringResource(id = R.string.forgot_pin_instruction))
+                Text(text = description)
             },
             confirmButton = {
                 Button(

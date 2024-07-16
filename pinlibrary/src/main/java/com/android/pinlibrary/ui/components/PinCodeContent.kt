@@ -49,6 +49,7 @@ fun PinCodeContent(
 
     LaunchedEffect(key1 = onNumberClickListener) {
         onNumberClickListener = NumberListener { keyboardEnum ->
+            Log.d("TAGSS", "keyboardEnum = $keyboardEnum, showBiometricScreen = $showBiometricScreen")
             if (keyboardEnum == KeyboardButtonEnum.BUTTON_FINGERPRINT) {
                 showBiometricScreen = true
             } else {
@@ -60,6 +61,7 @@ fun PinCodeContent(
                     quantity = 0
                     buttonArray.clear()
                 }
+                showBiometricScreen = false
             }
         }
     }

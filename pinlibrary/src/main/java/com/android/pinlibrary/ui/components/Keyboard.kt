@@ -1,5 +1,6 @@
 package com.android.pinlibrary.ui.components
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -87,12 +88,18 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
             modifier = rowModifier
         ) {
             val settingsManager = SettingsManager(context = LocalContext.current)
-            if (pinCodeScenario == PinCodeScenario.VALIDATION && settingsManager.isBiometricEnabled()) {
+            if (
+                pinCodeScenario == PinCodeScenario.VALIDATION
+                && settingsManager.isBiometricEnabled()
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                ) {
                 ImageButton(
                     if (isSystemInDarkTheme()) R.drawable.ic_fingerprint_white_30 else R.drawable.ic_fingerprint_30,
                     KeyboardButtonEnum.BUTTON_FINGERPRINT
                 )
-            } else ImageButtonStub(R.drawable.ic_fingerprint_transparent_30)
+            } else {
+                ImageButtonStub(R.drawable.ic_fingerprint_transparent_30)
+            }
             NumberButton(
                 stringResource(id = R.string.button0_large_text),
                 KeyboardButtonEnum.BUTTON_0

@@ -1,4 +1,4 @@
-package com.android.pinlibrary.ui.components
+package com.android.pinlibrary.ui.systemdesign.indicator
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

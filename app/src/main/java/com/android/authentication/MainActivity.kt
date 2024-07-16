@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
                  */
                 pinCodeStateManager.onBiometricAuthentication {
                     // Your handling logic here
-                    isPinCodeScreenVisible = false
+                    isPinCodeScreenVisible = !it
                 }
 
                 /**
@@ -143,6 +143,10 @@ class MainActivity : ComponentActivity() {
                     enabled = true,
                     application = application
                 )
+
+                //TODO: Добавить показывать шторку биометрической аутентификации или нет
+                // диалог о включении биометрии
+                // исправить баг с вызовом шторки и тапом по экрану который возвращает на стартовый экран
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),

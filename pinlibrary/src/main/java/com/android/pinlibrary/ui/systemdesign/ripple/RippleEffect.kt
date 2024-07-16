@@ -1,4 +1,4 @@
-package com.android.pinlibrary.ui.style.ripple
+package com.android.pinlibrary.ui.systemdesign.ripple
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,12 +29,12 @@ fun RippleView(
     content: @Composable () -> Unit
 ) {
     var isRippleAnimating by remember { mutableStateOf(false) }
-    var rippleSize by remember { mutableStateOf(0f) }
+    var rippleSize by remember { mutableFloatStateOf(0f) }
     var ripplePosition by remember { mutableStateOf(Offset(0f, 0f)) }
 
     val rippleAlpha by animateFloatAsState(
         targetValue = if (isRippleAnimating) 0f else 0.3f,
-        animationSpec = tween(durationMillis = 400)
+        animationSpec = tween(durationMillis = 400), label = ""
     )
 
     Box(

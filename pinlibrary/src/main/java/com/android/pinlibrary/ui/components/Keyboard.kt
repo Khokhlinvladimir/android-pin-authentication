@@ -11,13 +11,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.android.pinlibrary.R
+import com.android.pinlibrary.ui.systemdesign.keyboardbutton.ImageButton
+import com.android.pinlibrary.ui.systemdesign.keyboardbutton.ImageButtonStub
+import com.android.pinlibrary.ui.systemdesign.keyboardbutton.NumberButton
+import com.android.pinlibrary.ui.systemdesign.theme.Dimens
 import com.android.pinlibrary.utils.enums.PinCodeScenario
 import com.android.pinlibrary.utils.keyboard.KeyboardButtonEnum
-import com.android.pinlibrary.utils.listeners.NumberListener
 import com.android.pinlibrary.utils.preferences.SettingsManager
-
 
 @Composable
 fun Keyboard(pinCodeScenario: PinCodeScenario) {
@@ -27,23 +28,25 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
     Column(
         modifier = Modifier
             .wrapContentSize()
-            .padding(horizontal = 16.dp, vertical = 20.dp),
+            .padding(
+                vertical = Dimens.verticalKeyboardPadding,
+                horizontal = Dimens.horizontalKeyboardPadding
+            ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Row(
             modifier = rowModifier
         ) {
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button1_large_text),
                 KeyboardButtonEnum.BUTTON_1
             )
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button2_large_text),
                 KeyboardButtonEnum.BUTTON_2
             )
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button3_large_text),
                 KeyboardButtonEnum.BUTTON_3
             )
@@ -51,15 +54,15 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
         Row(
             modifier = rowModifier
         ) {
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button4_large_text),
                 KeyboardButtonEnum.BUTTON_4
             )
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button5_large_text),
                 KeyboardButtonEnum.BUTTON_5
             )
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button6_large_text),
                 KeyboardButtonEnum.BUTTON_6
             )
@@ -67,15 +70,15 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
         Row(
             modifier = rowModifier
         ) {
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button7_large_text),
                 KeyboardButtonEnum.BUTTON_7
             )
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button8_large_text),
                 KeyboardButtonEnum.BUTTON_8
             )
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button9_large_text),
                 KeyboardButtonEnum.BUTTON_9
             )
@@ -90,7 +93,7 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
                     KeyboardButtonEnum.BUTTON_FINGERPRINT
                 )
             } else ImageButtonStub(R.drawable.ic_fingerprint_transparent_30)
-            TextButton(
+            NumberButton(
                 stringResource(id = R.string.button0_large_text),
                 KeyboardButtonEnum.BUTTON_0
             )
@@ -100,12 +103,4 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
             )
         }
     }
-}
-
-var onNumberClickListener: NumberListener? = null
-fun setNumberClickListener(
-    onNumberClickListener: NumberListener?,
-    keyboardEnum: KeyboardButtonEnum
-) {
-    onNumberClickListener?.onNumberTriggered(keyboardEnum)
 }

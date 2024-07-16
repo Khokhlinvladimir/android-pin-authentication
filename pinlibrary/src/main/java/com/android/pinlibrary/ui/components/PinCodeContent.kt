@@ -2,10 +2,12 @@ package com.android.pinlibrary.ui.components
 
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -17,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.android.pinlibrary.ui.systemdesign.indicator.RoundedBoxesRow
+import com.android.pinlibrary.ui.systemdesign.keyboardbutton.onNumberClickListener
 import com.android.pinlibrary.utils.biometric.BiometricScannerScreen
 import com.android.pinlibrary.utils.enums.PinCodeScenario
 import com.android.pinlibrary.utils.helpers.fillArrayWithButtons
@@ -33,6 +37,7 @@ fun PinCodeContent(
     pinCodeStateManager: PinCodeStateManager? = null,
     pinCodeScenario: PinCodeScenario = PinCodeScenario.STUB,
     authenticationCallback: BiometricPrompt.AuthenticationCallback? = null,
+    isBiometricAuthenticationSucceeded: Boolean = false,
     onClick: (buttonArray: SnapshotStateList<Int>) -> Unit
 ) {
     val settingsManager = SettingsManager(context = LocalContext.current)
@@ -42,9 +47,8 @@ fun PinCodeContent(
     var quantity by remember { mutableIntStateOf(0) }
     var showBiometricScreen by remember { mutableStateOf(false) }
 
-    onNumberClickListener = object : NumberListener {
-        override fun onNumberTriggered(keyboardEnum: KeyboardButtonEnum) {
-
+    LaunchedEffect(key1 = onNumberClickListener) {
+        onNumberClickListener = NumberListener { keyboardEnum ->
             if (keyboardEnum == KeyboardButtonEnum.BUTTON_FINGERPRINT) {
                 showBiometricScreen = true
             } else {
@@ -60,9 +64,12 @@ fun PinCodeContent(
         }
     }
 
+    LaunchedEffect(key1 = isBiometricAuthenticationSucceeded) {
+        showBiometricScreen = isBiometricAuthenticationSucceeded
+    }
+
     if (showBiometricScreen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && authenticationCallback != null) {
-        BiometricScannerScreen(authenticationCallback)
-        showBiometricScreen = false
+        BiometricScannerScreen(authenticationCallback = authenticationCallback)
     }
 
     Column(
@@ -72,9 +79,9 @@ fun PinCodeContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         PinCodeScreenHeader(stringResource(id = headerId))
-        PinCodeScreenNotification(notification)
-        RoundedBoxesRow(startQuantity, quantity)
-        Keyboard(pinCodeScenario)
+        PinCodeScreenNotification(text = notification)
+        RoundedBoxesRow(startQuantity = startQuantity, quantity = quantity)
+        Keyboard(pinCodeScenario = pinCodeScenario)
         if (pinCodeStateManager != null) {
             PinCodeScreenForgot(
                 stringResource(

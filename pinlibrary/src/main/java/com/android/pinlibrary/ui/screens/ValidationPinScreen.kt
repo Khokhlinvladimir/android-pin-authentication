@@ -34,6 +34,7 @@ fun ValidationPinScreen(
     val attemptCounter = AttemptCounter(context = context)
     var isInitScenario by remember { mutableStateOf(false) }
     var isError by remember { mutableStateOf(false) }
+    var isBiometricAuthenticationSucceeded by remember { mutableStateOf(false) }
     var headerId by remember { mutableIntStateOf(R.string.pin_code_step_create) }
     val notificationText = stringResource(id = R.string.empty)
     var notification by remember { mutableStateOf(notificationText) }
@@ -87,6 +88,7 @@ fun ValidationPinScreen(
 
         override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
             pinCodeStateManager.setBiometricAuthentication(true)
+            isBiometricAuthenticationSucceeded = true
         }
 
         override fun onAuthenticationFailed() {
@@ -99,6 +101,7 @@ fun ValidationPinScreen(
         notification = notification,
         pinCodeScenario = pinCodeScenario,
         authenticationCallback = authenticationCallback,
+        isBiometricAuthenticationSucceeded = isBiometricAuthenticationSucceeded,
         forgotMessageId = forgotMessageId,
         pinCodeStateManager = pinCodeStateManager
     ) {

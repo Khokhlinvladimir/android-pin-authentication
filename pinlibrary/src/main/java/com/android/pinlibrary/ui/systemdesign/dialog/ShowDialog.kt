@@ -1,4 +1,4 @@
-package com.android.pinlibrary.ui.components
+package com.android.pinlibrary.ui.systemdesign.dialog
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button

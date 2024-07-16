@@ -1,4 +1,4 @@
-package com.android.pinlibrary.ui.components
+package com.android.pinlibrary.ui.systemdesign.keyboardbutton
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -14,27 +14,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.android.pinlibrary.ui.style.ripple.RippleView
+import com.android.pinlibrary.ui.systemdesign.ripple.RippleView
+import com.android.pinlibrary.ui.systemdesign.theme.Dimens
 import com.android.pinlibrary.utils.keyboard.KeyboardButtonEnum
+import com.android.pinlibrary.utils.listeners.NumberListener
 
 @Composable
-fun TextButton(
+fun NumberButton(
     number: String,
     keyboardEnum: KeyboardButtonEnum
 ) {
     Box(
         modifier = Modifier
             .wrapContentSize()
-            .padding(vertical = 10.dp, horizontal = 23.dp)
+            .padding(
+                vertical = Dimens.verticalKeyboardButtonPadding,
+                horizontal = Dimens.horizontalKeyboardButtonPadding
+            )
     ) {
         RippleView(
-            modifier = Modifier.size(50.dp)
+            modifier = Modifier.size(Dimens.keyBoardButtonSize)
         ) {
             Box(
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(Dimens.keyBoardButtonSize)
                     .clip(CircleShape)
                     .clickable {
                         setNumberClickListener(
@@ -46,7 +49,7 @@ fun TextButton(
             ) {
                 Text(
                     text = number,
-                    style = TextStyle(fontSize = 25.sp)
+                    style = TextStyle(fontSize = Dimens.keyBoardButtonFontSize)
                 )
             }
         }
@@ -62,14 +65,17 @@ fun ImageButton(
     Box(
         modifier = Modifier
             .wrapContentSize()
-            .padding(vertical = 10.dp, horizontal = 23.dp)
+            .padding(
+                vertical = Dimens.verticalKeyboardButtonPadding,
+                horizontal = Dimens.horizontalKeyboardButtonPadding
+            )
     ) {
         RippleView(
-            modifier = Modifier.size(50.dp)
+            modifier = Modifier.size(Dimens.keyBoardButtonSize)
         ) {
             Box(
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(Dimens.keyBoardButtonSize)
                     .clip(CircleShape)
                     .clickable {
                         setNumberClickListener(
@@ -79,7 +85,6 @@ fun ImageButton(
                     },
                 contentAlignment = Alignment.Center
             ) {
-
                 Image(
                     painter = painter,
                     contentDescription = null
@@ -97,15 +102,17 @@ fun ImageButtonStub(
     Box(
         modifier = Modifier
             .wrapContentSize()
-            .padding(vertical = 10.dp, horizontal = 23.dp)
+            .padding(
+                vertical = Dimens.verticalKeyboardButtonPadding,
+                horizontal = Dimens.horizontalKeyboardButtonPadding
+            )
     ) {
         Box(
             modifier = Modifier
-                .size(50.dp)
+                .size(Dimens.keyBoardButtonSize)
                 .clip(CircleShape),
             contentAlignment = Alignment.Center
         ) {
-
             Image(
                 painter = painter,
                 contentDescription = null
@@ -114,5 +121,12 @@ fun ImageButtonStub(
     }
 }
 
+internal var onNumberClickListener: NumberListener? = null
+internal fun setNumberClickListener(
+    onNumberClickListener: NumberListener?,
+    keyboardEnum: KeyboardButtonEnum
+) {
+    onNumberClickListener?.onNumberTriggered(keyboardEnum)
+}
 
 

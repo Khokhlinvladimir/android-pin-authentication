@@ -28,7 +28,7 @@ Installing a PIN authentication library is the first step to securely protecting
 
 ```gradle
 dependencies {
-    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v1.0.3'
+    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v1.0.4'
 }
 ```
 With this simple step, you will enable a powerful authentication tool in your application, making it reliable and secure.

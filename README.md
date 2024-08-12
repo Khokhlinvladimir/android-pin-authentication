@@ -8,6 +8,8 @@
 
 Library for user authentication using PIN code. This library provides convenient and secure ways to verify users' identities using a simple numeric PIN. It can be used by developers when creating applications that require an additional layer of security or user authentication.
 
+<img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_russian.gif" alt="" width="200px"></a>
+
 ## Main features
 
 1. Simple and intuitive PIN authentication.

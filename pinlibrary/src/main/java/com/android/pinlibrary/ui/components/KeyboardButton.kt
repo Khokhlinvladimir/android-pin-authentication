@@ -1,4 +1,4 @@
-package com.android.pinlibrary.ui.systemdesign.keyboardbutton
+package com.android.pinlibrary.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

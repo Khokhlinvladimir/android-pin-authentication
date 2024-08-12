@@ -59,6 +59,7 @@ fun PinCodeContent(
 
     if (showBiometricScreen && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && authenticationCallback != null) {
         BiometricScannerScreen(authenticationCallback = authenticationCallback)
+        showBiometricScreen = false
     }
 
     Column(

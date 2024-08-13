@@ -8,7 +8,7 @@
 
 Библиотека для аутентификации пользователей с использованием PIN-кода. Эта библиотека предоставляет удобные и безопасные способы проверки личности пользователей с помощью простого числового PIN-кода. Она может быть использована разработчиками при создании приложений, требующих дополнительного слоя безопасности или идентификации пользователей.
 
-<img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_russian.gif" alt="" width="200px"></a>
+<img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_russian.gif" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_01.png" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_02.png" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_03.png" alt="" width="200px"></a>
 
 ## Основные возможности
 

@@ -63,6 +63,7 @@ val pinCodeStateManager = PinCodeStateManager.getInstance()
 pinCodeStateManager.setMaxPinAttempts(maxAttempts = 4, application = application)
 pinCodeStateManager.setPinLength(pinLength = 4, application = application)
 pinCodeStateManager.setBiometricEnabled(enabled = true, application = application)
+pinCodeStateManager.autoLaunchBiometricEnabled(enabled = true,application = application)
 ```
 
 ## Шаг 4: Создание, валидация, изменение и удаление PIN-кода

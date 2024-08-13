@@ -63,6 +63,7 @@ Set security options such as maximum number of PIN attempts, PIN length, and bio
 pinCodeStateManager.setMaxPinAttempts(maxAttempts = 4, application = application)
 pinCodeStateManager.setPinLength(pinLength = 4, application = application)
 pinCodeStateManager.setBiometricEnabled(enabled = true, application = application)
+pinCodeStateManager.autoLaunchBiometricEnabled(enabled = true,application = application)
 ```
 
 ## Step 4: Create, validate, change and delete PIN code

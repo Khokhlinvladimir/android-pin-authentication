@@ -143,7 +143,7 @@ Surface(
 
 Целевая версия SDK (targetSdk): 34
 
-Версия Gradle: 8.0
+Версия Gradle: 8.5.2
 
 Версия OpenJDK: 17.0.1
 

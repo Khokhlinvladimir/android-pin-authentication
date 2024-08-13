@@ -57,7 +57,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.android.pinlibrary'
                 artifactId = 'pinlibrary'
-                version = '1.0.4'
+                version = '1.0.5'
             }
         }
         repositories {

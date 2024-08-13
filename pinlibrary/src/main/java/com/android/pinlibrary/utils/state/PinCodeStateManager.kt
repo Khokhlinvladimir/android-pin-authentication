@@ -131,6 +131,19 @@ class PinCodeStateManager private constructor() : IPinCodeStateManager {
     }
 
     /**
+     * Set the value of the "Auto-launch biometric authentication" option and return the current value.
+     *
+     * @param enabled true to enable automatic biometric dialog on validation start; false to disable.
+     * @param application Application context.
+     * @return true if automatic biometric launch is enabled; false otherwise.
+     */
+    override fun autoLaunchBiometricEnabled(enabled: Boolean, application: Application): Boolean {
+        val settingsManager = SettingsManager(context = application)
+        settingsManager.setAutoLaunchBiometricEnabled(enabled)
+        return settingsManager.isAutoLaunchBiometricEnabled()
+    }
+
+    /**
      * Set the maximum number of pin code entry attempts and return the current value.
      *
      * @param maxAttempts New maximum number of attempts.

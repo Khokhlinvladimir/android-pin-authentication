@@ -26,6 +26,7 @@ interface IPinCodeStateManager {
     fun isPinCodeSaved(application: Application): Boolean
 
     fun setBiometricEnabled(enabled: Boolean, application: Application): Boolean
+    fun autoLaunchBiometricEnabled(enabled: Boolean, application: Application): Boolean
     fun setMaxPinAttempts(maxAttempts: Int, application: Application): Int
     fun setPinLength(pinLength: Int, application: Application): Int
 

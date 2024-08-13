@@ -144,9 +144,16 @@ class MainActivity : ComponentActivity() {
                     application = application
                 )
 
-                //TODO: Добавить показывать шторку биометрической аутентификации или нет
-                // диалог о включении биометрии
-                // исправить баг с вызовом шторки и тапом по экрану который возвращает на стартовый экран
+                /**
+                 * Enables or disables automatic biometric authentication dialog launch on validation screen start.
+                 *
+                 * @param enabled True to enable automatic biometric launch, false to disable.
+                 * @param application The application context.
+                 */
+                val autoLaunchBiometricEnabled = pinCodeStateManager.autoLaunchBiometricEnabled(
+                    enabled = true,
+                    application = application
+                )
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),

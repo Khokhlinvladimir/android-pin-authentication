@@ -18,6 +18,17 @@ class SettingsManager(context: Context) : ISettingsManager {
         editor.apply()
     }
 
+    override fun isAutoLaunchBiometricEnabled(): Boolean {
+        return sharedPreferences.getBoolean(AUTO_LAUNCH_BIOMETRIC_ENABLED_KEY, true)
+        /** Enabled by default */
+    }
+
+    override fun setAutoLaunchBiometricEnabled(enabled: Boolean) {
+        val editor = sharedPreferences.edit()
+        editor.putBoolean(AUTO_LAUNCH_BIOMETRIC_ENABLED_KEY, enabled)
+        editor.apply()
+    }
+
     override fun getMaxPinAttempts(): Int {
         return sharedPreferences.getInt(MAX_PIN_ATTEMPTS_KEY, 5)
         /** Default 5 attempts */
@@ -42,6 +53,7 @@ class SettingsManager(context: Context) : ISettingsManager {
 
     companion object {
         private const val BIOMETRIC_ENABLED_KEY = "biometric_enabled"
+        private const val AUTO_LAUNCH_BIOMETRIC_ENABLED_KEY = "auto_launch_biometric_enabled"
         private const val MAX_PIN_ATTEMPTS_KEY = "max_pin_attempts"
         private const val PIN_LENGTH_KEY = "pin_length"
     }

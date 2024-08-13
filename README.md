@@ -143,7 +143,7 @@ Minimum SDK version (minSdk): 24
 
 Target SDK version (targetSdk): 34
 
-Gradle version: 8.0
+Gradle version: 8.5.2
 
 OpenJDK Version: 17.0.1
 

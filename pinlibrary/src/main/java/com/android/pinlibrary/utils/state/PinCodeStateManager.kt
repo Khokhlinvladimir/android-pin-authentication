@@ -1,6 +1,7 @@
 package com.android.pinlibrary.utils.state
 
 import android.app.Application
+import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.pinlibrary.utils.enums.PinCodeScenario
@@ -46,7 +47,11 @@ class PinCodeStateManager private constructor() : IPinCodeStateManager {
     }
 
     override fun setScenario(scenario: PinCodeScenario) {
-        _currentScenario.value = scenario
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            _currentScenario.value = scenario
+        } else {
+            _currentScenario.postValue(scenario)
+        }
     }
 
     internal fun setCreationSuccess(isSuccess: Boolean) {
@@ -152,7 +157,11 @@ class PinCodeStateManager private constructor() : IPinCodeStateManager {
      */
     override fun setMaxPinAttempts(maxAttempts: Int, application: Application): Int {
         val settingsManager = SettingsManager(context = application)
+        val previousMaxAttempts = settingsManager.getMaxPinAttempts()
         settingsManager.setMaxPinAttempts(maxAttempts)
+        if (previousMaxAttempts != maxAttempts) {
+            AttemptCounter(context = application).resetAttempts()
+        }
         return settingsManager.getMaxPinAttempts()
     }
 
@@ -165,6 +174,10 @@ class PinCodeStateManager private constructor() : IPinCodeStateManager {
      */
     override fun setPinLength(pinLength: Int, application: Application): Int {
         val settingsManager = SettingsManager(context = application)
+        val currentPinLength = settingsManager.getPinLength()
+        require(currentPinLength == pinLength || !isPinCodeSaved(application)) {
+            "Clear the saved PIN before changing its length"
+        }
         settingsManager.setPinLength(pinLength)
         return settingsManager.getPinLength()
     }

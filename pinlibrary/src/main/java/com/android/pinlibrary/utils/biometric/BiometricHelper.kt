@@ -1,16 +1,15 @@
 package com.android.pinlibrary.utils.biometric
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.os.CancellationSignal
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.android.pinlibrary.R
@@ -23,15 +22,18 @@ import java.util.concurrent.Executor
 class BiometricHelper(private val context: Context) {
 
     private var executor: Executor? = null
+    private var cancellationSignal: CancellationSignal? = null
 
     private fun isBiometricSupported(): Boolean {
         val biometricManager = BiometricManager.from(context)
-        return biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
+        return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK) ==
+            BiometricManager.BIOMETRIC_SUCCESS
     }
 
     private fun startAuthentication(authenticationCallback: BiometricPrompt.AuthenticationCallback) {
         executor = ContextCompat.getMainExecutor(context)
-        val cancellationSignal = CancellationSignal()
+        cancellationSignal?.cancel()
+        cancellationSignal = CancellationSignal()
         val biometricPrompt = executor?.let {
             BiometricPrompt.Builder(context)
                 .setTitle(context.getString(R.string.authorization))
@@ -43,7 +45,7 @@ class BiometricHelper(private val context: Context) {
 
         executor?.let {
             biometricPrompt?.authenticate(
-                cancellationSignal,
+                cancellationSignal!!,
                 it,
                 authenticationCallback
             )
@@ -58,6 +60,11 @@ class BiometricHelper(private val context: Context) {
             // Биометрическая аутентификация не поддерживается
         }
     }
+
+    fun cancelAuthentication() {
+        cancellationSignal?.cancel()
+        cancellationSignal = null
+    }
 }
 
 /**
@@ -67,36 +74,15 @@ class BiometricHelper(private val context: Context) {
 @RequiresApi(Build.VERSION_CODES.P)
 fun BiometricScannerScreen(authenticationCallback: BiometricPrompt.AuthenticationCallback) {
     val context = LocalContext.current
-    val biometricHelper = BiometricHelper(context)
+    val biometricHelper = remember(context) { BiometricHelper(context) }
 
-    /**
-     * The process of creating the requestPermissionLauncher that is used to request permission
-     */
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            biometricHelper.openBiometricScanner(authenticationCallback)
-        } else {
-            /**
-             * Perform actions if not granted
-             */
-        }
+    LaunchedEffect(biometricHelper, authenticationCallback) {
+        biometricHelper.openBiometricScanner(authenticationCallback)
     }
 
-    when (ContextCompat.checkSelfPermission(
-        context,
-        Manifest.permission.USE_BIOMETRIC
-    )) {
-        PackageManager.PERMISSION_GRANTED -> {
-            biometricHelper.openBiometricScanner(authenticationCallback)
-        }
-
-        else -> {
-            /**
-             * Request permission if not granted
-             */
-            requestPermissionLauncher.launch(Manifest.permission.USE_BIOMETRIC)
+    DisposableEffect(biometricHelper) {
+        onDispose {
+            biometricHelper.cancelAuthentication()
         }
     }
 }

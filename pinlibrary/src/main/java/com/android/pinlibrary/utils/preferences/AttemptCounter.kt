@@ -10,7 +10,7 @@ class AttemptCounter(val context: Context) : IAttemptCounter {
     private val settingsManager = SettingsManager(context = context)
 
     override fun saveAttempts(attempts: Int) {
-        sharedPreferences.edit().putInt(KEY_ATTEMPTS, attempts).apply()
+        sharedPreferences.edit().putInt(KEY_ATTEMPTS, attempts.coerceAtLeast(0)).apply()
     }
 
     override fun getAttempts(): Int {
@@ -27,6 +27,8 @@ class AttemptCounter(val context: Context) : IAttemptCounter {
     override fun resetAttempts() {
         saveAttempts(settingsManager.getMaxPinAttempts())
     }
+
+    fun hasAttemptsRemaining(): Boolean = getAttempts() > 0
 
     companion object {
         private const val PREFS_NAME = "AttemptPrefs"

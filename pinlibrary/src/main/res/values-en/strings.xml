@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="pin_code_forgot_text">Forgot?</string>
-    <string name="pin_code_step_disable">Disable Pincode</string>
+    <string name="pin_code_step_disable">Disable %1$d-digit PIN</string>
     <string name="pin_code_step_create">Create a PIN code</string>
     <string name="pin_code_step_change">Enter Pincode</string>
     <string name="pin_code_step_unlock">Enter Pincode</string>
@@ -12,6 +12,7 @@
     <string name="pin_code_attempts">Incorrect PIN. Attempts left: %1$d</string>
     <string name="pin_codes_do_not_match">PIN codes do not match</string>
     <string name="password_successfully_saved">Password successfully saved</string>
+    <string name="pin_code_storage_error">Unable to store PIN. Try again.</string>
 
     <string name="authorization">Authorization</string>
     <string name="use_biometry">Use biometrics for authorization</string>

@@ -1,5 +1,6 @@
 package com.android.pinlibrary.viewmodel
 
+import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,24 +34,29 @@ class PinViewModel : ViewModel() {
     fun processIntent(intent: ChangePinScreenIntent) {
         when (intent) {
             is ChangePinScreenIntent.InitialState -> {
-                _changePinScreenState.value = ChangePinScreenState.InitialState
+                _changePinScreenState.setValueSafely(ChangePinScreenState.InitialState)
             }
 
             is ChangePinScreenIntent.EnterCurrentPin -> {
-                _changePinScreenState.value =
+                _changePinScreenState.setValueSafely(
                     ChangePinScreenState.EnteringCurrentPin(intent.currentPin)
+                )
             }
 
             is ChangePinScreenIntent.EnterNewPin -> {
-                _changePinScreenState.value = ChangePinScreenState.EnteringNewPin(intent.newPin)
+                _changePinScreenState.setValueSafely(
+                    ChangePinScreenState.EnteringNewPin(intent.newPin)
+                )
             }
 
             is ChangePinScreenIntent.ConfirmNewPin -> {
-                _changePinScreenState.value = ChangePinScreenState.ConfirmingNewPin(intent.newPin)
+                _changePinScreenState.setValueSafely(
+                    ChangePinScreenState.ConfirmingNewPin(intent.newPin)
+                )
             }
 
             is ChangePinScreenIntent.ChangePin -> {
-                _changePinScreenState.value = ChangePinScreenState.PinChangedSuccess
+                _changePinScreenState.setValueSafely(ChangePinScreenState.PinChangedSuccess)
             }
         }
     }
@@ -58,19 +64,23 @@ class PinViewModel : ViewModel() {
     fun processIntent(intent: CreatePinScreenIntent) {
         when (intent) {
             is CreatePinScreenIntent.InitialState -> {
-                _createPinScreenState.value = CreatePinScreenState.InitialState
+                _createPinScreenState.setValueSafely(CreatePinScreenState.InitialState)
             }
 
             is CreatePinScreenIntent.EnterPin -> {
-                _createPinScreenState.value = CreatePinScreenState.EnteringPinState(intent.pin)
+                _createPinScreenState.setValueSafely(
+                    CreatePinScreenState.EnteringPinState(intent.pin)
+                )
             }
 
             is CreatePinScreenIntent.ConfirmPin -> {
-                _createPinScreenState.value = CreatePinScreenState.ConfirmingPinState(intent.pin)
+                _createPinScreenState.setValueSafely(
+                    CreatePinScreenState.ConfirmingPinState(intent.pin)
+                )
             }
 
             is CreatePinScreenIntent.CreatePin -> {
-                _createPinScreenState.value = CreatePinScreenState.PinCreatedState
+                _createPinScreenState.setValueSafely(CreatePinScreenState.PinCreatedState)
             }
         }
     }
@@ -78,15 +88,17 @@ class PinViewModel : ViewModel() {
     fun processIntent(intent: DeletePinScreenIntent) {
         when (intent) {
             is DeletePinScreenIntent.InitialState -> {
-                _deletePinScreenState.value = DeletePinScreenState.InitialState
+                _deletePinScreenState.setValueSafely(DeletePinScreenState.InitialState)
             }
 
             is DeletePinScreenIntent.EnterPin -> {
-                _deletePinScreenState.value = DeletePinScreenState.EnteringPinState(intent.pin)
+                _deletePinScreenState.setValueSafely(
+                    DeletePinScreenState.EnteringPinState(intent.pin)
+                )
             }
 
             is DeletePinScreenIntent.DeletePin -> {
-                _deletePinScreenState.value = DeletePinScreenState.PinDeletedState
+                _deletePinScreenState.setValueSafely(DeletePinScreenState.PinDeletedState)
             }
         }
     }
@@ -94,17 +106,26 @@ class PinViewModel : ViewModel() {
     fun processIntent(intent: ValidationPinScreenIntent) {
         when (intent) {
             is ValidationPinScreenIntent.InitialState -> {
-                _validationPinScreenState.value = ValidationPinScreenState.InitialState
+                _validationPinScreenState.setValueSafely(ValidationPinScreenState.InitialState)
             }
 
             is ValidationPinScreenIntent.EnterPin -> {
-                _validationPinScreenState.value =
+                _validationPinScreenState.setValueSafely(
                     ValidationPinScreenState.EnteringPinState(intent.pin)
+                )
             }
 
             is ValidationPinScreenIntent.ValidatePin -> {
-                _validationPinScreenState.value = ValidationPinScreenState.PinValidatedState
+                _validationPinScreenState.setValueSafely(ValidationPinScreenState.PinValidatedState)
             }
+        }
+    }
+
+    private fun <T> MutableLiveData<T>.setValueSafely(value: T) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            this.value = value
+        } else {
+            postValue(value)
         }
     }
 }

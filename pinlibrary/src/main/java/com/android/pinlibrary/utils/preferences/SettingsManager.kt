@@ -35,6 +35,9 @@ class SettingsManager(context: Context) : ISettingsManager {
     }
 
     override fun setMaxPinAttempts(maxAttempts: Int) {
+        require(maxAttempts in MIN_PIN_ATTEMPTS..MAX_PIN_ATTEMPTS) {
+            "Maximum PIN attempts must be between $MIN_PIN_ATTEMPTS and $MAX_PIN_ATTEMPTS"
+        }
         val editor = sharedPreferences.edit()
         editor.putInt(MAX_PIN_ATTEMPTS_KEY, maxAttempts)
         editor.apply()
@@ -46,6 +49,9 @@ class SettingsManager(context: Context) : ISettingsManager {
     }
 
     override fun setPinLength(pinLength: Int) {
+        require(pinLength in MIN_PIN_LENGTH..MAX_PIN_LENGTH) {
+            "PIN length must be between $MIN_PIN_LENGTH and $MAX_PIN_LENGTH"
+        }
         val editor = sharedPreferences.edit()
         editor.putInt(PIN_LENGTH_KEY, pinLength)
         editor.apply()
@@ -56,5 +62,9 @@ class SettingsManager(context: Context) : ISettingsManager {
         private const val AUTO_LAUNCH_BIOMETRIC_ENABLED_KEY = "auto_launch_biometric_enabled"
         private const val MAX_PIN_ATTEMPTS_KEY = "max_pin_attempts"
         private const val PIN_LENGTH_KEY = "pin_length"
+        const val MIN_PIN_ATTEMPTS = 1
+        const val MAX_PIN_ATTEMPTS = 100
+        const val MIN_PIN_LENGTH = 4
+        const val MAX_PIN_LENGTH = 12
     }
 }

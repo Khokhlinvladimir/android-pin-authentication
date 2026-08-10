@@ -36,10 +36,7 @@ class MainActivity : ComponentActivity() {
                  * This method is responsible for handling the event when all login attempts are used up.
                  */
                 pinCodeStateManager.onLoginAttemptsExpended {
-                    // Your handling logic here
-                    isPinCodeScreenVisible = false
-                    isPinCodeCreated = false
-                    pinCodeStateManager.clearConfiguration(application = application)
+                    // Keep the screen locked. The user can recover through the "Forgot PIN" flow.
                 }
 
                 /**

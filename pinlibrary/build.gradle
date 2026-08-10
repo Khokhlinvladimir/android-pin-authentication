@@ -57,7 +57,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.android.pinlibrary'
                 artifactId = 'pinlibrary'
-                version = '1.0.5'
+                version = '1.0.6'
             }
         }
         repositories {
@@ -93,6 +93,7 @@ dependencies {
     // AndroidX Compose для UI-test
     androidTestImplementation platform('androidx.compose:compose-bom:2024.06.00')
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
      // AndroidX Compose UI Tooling (только для отладки)
     debugImplementation 'androidx.compose.ui:ui-tooling'

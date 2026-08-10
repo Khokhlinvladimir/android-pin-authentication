@@ -22,4 +22,6 @@
     <string name="forgot_pin">Forgot PIN?</string>
     <string name="forgot_pin_instruction">If you forgot your PIN, you can reset it by re-authenticating</string>
     <string name="ok_button">OK</string>
+    <string name="pin_code_already_configured">PIN is already configured</string>
+    <string name="pin_code_not_configured">PIN is not configured</string>
 </resources>

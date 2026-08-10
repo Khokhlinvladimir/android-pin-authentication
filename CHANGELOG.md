@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.0-alpha01
+
+- Add an injectable `PinAuthController` with immutable `StateFlow` state and typed results.
+- Add public credential and attempt-store contracts for JVM testing and custom persistence.
+- Add a state-driven `PinAuthScreen` Compose entry point that does not use the legacy singleton.
+- Keep the existing `PinCodeScreen` API available for backwards compatibility.
+- Add controller unit tests and real-device coverage for the new Compose entry point.
+
 ## 1.0.6
 
 - Replace the fast SHA-256 PIN verifier with a versioned PBKDF2 verifier and per-PIN random salt.

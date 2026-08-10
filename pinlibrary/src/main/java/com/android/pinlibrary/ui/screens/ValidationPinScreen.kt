@@ -4,14 +4,14 @@ import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import com.android.pinlibrary.R
 import com.android.pinlibrary.ui.components.PinCodeContent
 import com.android.pinlibrary.utils.enums.PinCodeScenario
@@ -19,8 +19,10 @@ import com.android.pinlibrary.utils.preferences.AttemptCounter
 import com.android.pinlibrary.utils.preferences.PinCodeManager
 import com.android.pinlibrary.utils.state.PinCodeStateManager
 import com.android.pinlibrary.utils.state.validationpin.ValidationPinScreenIntent
-import com.android.pinlibrary.utils.state.validationpin.ValidationPinScreenState
 import com.android.pinlibrary.viewmodel.PinViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun ValidationPinScreen(
@@ -28,84 +30,87 @@ fun ValidationPinScreen(
     pinCodeStateManager: PinCodeStateManager,
     pinCodeScenario: PinCodeScenario
 ) {
-
     val context = LocalContext.current
-    val pinCodeManager = PinCodeManager(context = context)
-    val attemptCounter = AttemptCounter(context = context)
-    var isInitScenario by remember { mutableStateOf(false) }
-    var isError by remember { mutableStateOf(false) }
-    var headerId by remember { mutableIntStateOf(R.string.pin_code_step_create) }
-    val notificationText = stringResource(id = R.string.empty)
-    var notification by remember { mutableStateOf(notificationText) }
-    val forgotMessageId by remember { mutableIntStateOf(R.string.pin_code_forgot_text) }
+    val pinCodeManager = remember(context) { PinCodeManager(context) }
+    val attemptCounter = remember(context) { AttemptCounter(context) }
+    val coroutineScope = rememberCoroutineScope()
+    var attempts by remember { mutableIntStateOf(attemptCounter.getAttempts()) }
+    var notification by remember { mutableStateOf("") }
+    var isProcessing by remember { mutableStateOf(false) }
+    var isCompleted by remember { mutableStateOf(false) }
+    var exhaustionReported by remember { mutableStateOf(false) }
 
-    if (!isInitScenario && pinCodeStateManager.isValidationEnabled) {
-        viewModel.processIntent(ValidationPinScreenIntent.InitialState)
-        isInitScenario = true
+    LaunchedEffect(Unit) {
+        if (pinCodeStateManager.isValidationEnabled) {
+            viewModel.processIntent(ValidationPinScreenIntent.InitialState)
+        }
+        if (attempts == 0 && !exhaustionReported) {
+            notification = context.getString(R.string.pin_code_attempts, 0)
+            exhaustionReported = true
+            pinCodeStateManager.setLoginAttemptsExpended()
+        }
     }
 
-    when (val state = viewModel.validationPinScreenState.observeAsState().value) {
-        is ValidationPinScreenState.InitialState -> {
-            headerId = R.string.pin_code_step_unlock
-        }
-
-        is ValidationPinScreenState.EnteringPinState -> {
-            if (pinCodeManager.isPinCodeCorrect(state.pin)) {
-                viewModel.processIntent(ValidationPinScreenIntent.ValidatePin)
-                attemptCounter.resetAttempts()
-            } else {
-                if (!isError) {
-                    attemptCounter.decrementAttempts()
-                    notification = stringResource(
-                        id = R.string.pin_code_attempts,
-                        attemptCounter.getAttempts()
-                    )
-                    if (attemptCounter.getAttempts() == 0) {
-                        pinCodeStateManager.setLoginAttemptsExpended()
-                    }
-                    isError = true
-                }
-            }
-        }
-
-        is ValidationPinScreenState.PinValidatedState -> {
-            pinCodeStateManager.setValidationSuccess(true)
-        }
-
-        is ValidationPinScreenState.ErrorState -> {
-            pinCodeStateManager.setValidationSuccess(false)
-        }
-
-        else -> {}
-    }
-
-    val authenticationCallback = @RequiresApi(Build.VERSION_CODES.P)
-    object : BiometricPrompt.AuthenticationCallback() {
-        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-            pinCodeStateManager.setBiometricAuthentication(false)
-        }
-
-        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-            pinCodeStateManager.setBiometricAuthentication(true)
-        }
-
-        override fun onAuthenticationFailed() {
-            pinCodeStateManager.setBiometricAuthentication(false)
-        }
+    val authenticationCallback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        rememberPlatformBiometricCallback(pinCodeStateManager)
+    } else {
+        null
     }
 
     PinCodeContent(
-        headerId = headerId,
+        headerId = R.string.pin_code_step_unlock,
         notification = notification,
         pinCodeScenario = pinCodeScenario,
         authenticationCallback = authenticationCallback,
-        forgotMessageId = forgotMessageId,
-        pinCodeStateManager = pinCodeStateManager
+        forgotMessageId = R.string.pin_code_forgot_text,
+        pinCodeStateManager = pinCodeStateManager,
+        enabled = !isProcessing && !isCompleted && attempts > 0
     ) { pinValue ->
-        val pinCode = pinValue.toList().joinToString("")
+        if (isProcessing || isCompleted || attempts == 0) return@PinCodeContent
+        val pinCode = pinValue.joinToString("")
+        isProcessing = true
         viewModel.processIntent(ValidationPinScreenIntent.EnterPin(pinCode))
-        isError = false
+
+        coroutineScope.launch {
+            val isCorrect = withContext(Dispatchers.Default) {
+                pinCodeManager.isPinCodeCorrect(pinCode)
+            }
+            if (isCorrect) {
+                attemptCounter.resetAttempts()
+                attempts = attemptCounter.getAttempts()
+                isCompleted = true
+                viewModel.processIntent(ValidationPinScreenIntent.ValidatePin)
+                pinCodeStateManager.setValidationSuccess(true)
+            } else {
+                attemptCounter.decrementAttempts()
+                attempts = attemptCounter.getAttempts()
+                notification = context.getString(R.string.pin_code_attempts, attempts)
+                if (attempts == 0 && !exhaustionReported) {
+                    exhaustionReported = true
+                    pinCodeStateManager.setLoginAttemptsExpended()
+                }
+            }
+            isProcessing = false
+        }
     }
 }
 
+@Composable
+@RequiresApi(Build.VERSION_CODES.P)
+private fun rememberPlatformBiometricCallback(
+    pinCodeStateManager: PinCodeStateManager
+): BiometricPrompt.AuthenticationCallback = remember(pinCodeStateManager) {
+        object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                pinCodeStateManager.setBiometricAuthentication(false)
+            }
 
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                pinCodeStateManager.setBiometricAuthentication(true)
+            }
+
+            override fun onAuthenticationFailed() {
+                pinCodeStateManager.setBiometricAuthentication(false)
+            }
+        }
+    }

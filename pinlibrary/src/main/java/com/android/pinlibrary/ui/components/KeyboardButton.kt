@@ -23,6 +23,14 @@ import com.android.pinlibrary.utils.listeners.NumberListener
 fun NumberButton(
     number: String,
     keyboardEnum: KeyboardButtonEnum
+) = NumberButton(number, keyboardEnum, true) {}
+
+@Composable
+fun NumberButton(
+    number: String,
+    keyboardEnum: KeyboardButtonEnum,
+    enabled: Boolean,
+    onButtonClick: (KeyboardButtonEnum) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -39,12 +47,7 @@ fun NumberButton(
                 modifier = Modifier
                     .size(Dimens.keyBoardButtonSize)
                     .clip(CircleShape)
-                    .clickable {
-                        setNumberClickListener(
-                            onNumberClickListener = onNumberClickListener,
-                            keyboardEnum = keyboardEnum
-                        )
-                    },
+                    .clickable(enabled = enabled) { onButtonClick(keyboardEnum) },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -60,6 +63,14 @@ fun NumberButton(
 fun ImageButton(
     resourceId: Int,
     keyboardEnum: KeyboardButtonEnum
+) = ImageButton(resourceId, keyboardEnum, true) {}
+
+@Composable
+fun ImageButton(
+    resourceId: Int,
+    keyboardEnum: KeyboardButtonEnum,
+    enabled: Boolean,
+    onButtonClick: (KeyboardButtonEnum) -> Unit
 ) {
     val painter = painterResource(id = resourceId)
     Box(
@@ -77,12 +88,7 @@ fun ImageButton(
                 modifier = Modifier
                     .size(Dimens.keyBoardButtonSize)
                     .clip(CircleShape)
-                    .clickable {
-                        setNumberClickListener(
-                            onNumberClickListener = onNumberClickListener,
-                            keyboardEnum = keyboardEnum
-                        )
-                    },
+                    .clickable(enabled = enabled) { onButtonClick(keyboardEnum) },
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -121,12 +127,14 @@ fun ImageButtonStub(
     }
 }
 
+@Deprecated("The library keyboard now delivers clicks directly to its owning screen")
 internal var onNumberClickListener: NumberListener? = null
+
+@Deprecated("The library keyboard now delivers clicks directly to its owning screen")
 internal fun setNumberClickListener(
     onNumberClickListener: NumberListener?,
     keyboardEnum: KeyboardButtonEnum
 ) {
     onNumberClickListener?.onNumberTriggered(keyboardEnum)
 }
-
 

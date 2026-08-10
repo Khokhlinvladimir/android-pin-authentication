@@ -2,26 +2,32 @@ package com.android.pinlibrary.utils.preferences
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.os.Build
-import android.util.Base64
 import com.android.pinlibrary.utils.encryption.Encryptor
+import com.android.pinlibrary.utils.encryption.PinCodeHasher
 import com.android.pinlibrary.utils.encryption.enums.Algorithm
-import java.security.SecureRandom
+import java.security.MessageDigest
 
-class PinCodeManager(context: Context) : IPinCodeManager {
+class PinCodeManager internal constructor(
+    context: Context,
+    private val pinCodeHasher: PinCodeHasher
+) : IPinCodeManager {
+
+    constructor(context: Context) : this(context, PinCodeHasher())
 
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val settingsManager = SettingsManager(context)
 
     override fun savePinCode(pinCode: String) {
-        val salt = getSalt()
-        val saltedPinCode = salt + pinCode + salt
-        setAlgorithm(Algorithm.SHA256)
-        val hashedPinCode = Encryptor().getSHA(saltedPinCode, Algorithm.SHA256)
-
-        val editor = sharedPreferences.edit()
-        editor.putString(PIN_CODE_KEY, hashedPinCode)
-        editor.apply()
+        require(pinCode.length == settingsManager.getPinLength()) {
+            "PIN code length must match the configured PIN length"
+        }
+        val verifier = pinCodeHasher.create(pinCode)
+        sharedPreferences.edit()
+            .putString(PIN_CODE_KEY, verifier)
+            .remove(PASSWORD_SALT_PREFERENCE_KEY)
+            .remove(PASSWORD_ALGORITHM_PREFERENCE_KEY)
+            .apply()
     }
 
     override fun loadPinCode(): String? {
@@ -29,62 +35,36 @@ class PinCodeManager(context: Context) : IPinCodeManager {
     }
 
     override fun clearPinCode() {
-        val editor = sharedPreferences.edit()
-        editor.remove(PIN_CODE_KEY)
-        editor.apply()
+        sharedPreferences.edit()
+            .remove(PIN_CODE_KEY)
+            .remove(PASSWORD_SALT_PREFERENCE_KEY)
+            .remove(PASSWORD_ALGORITHM_PREFERENCE_KEY)
+            .apply()
     }
 
     override fun isPinCodeCorrect(enteredPinCode: String): Boolean {
-        val savedHashedPinCode = loadPinCode() ?: return false
-
-        /**PIN was not saved*/
-        val salt = getSalt()
-        val saltedEnteredPinCode = salt + enteredPinCode + salt
-        setAlgorithm(Algorithm.SHA256)
-        val hashedEnteredPinCode = Encryptor().getSHA(saltedEnteredPinCode, Algorithm.SHA256)
-        return savedHashedPinCode == hashedEnteredPinCode
-    }
-
-
-    private fun setAlgorithm(algorithm: Algorithm) {
-        val editor = sharedPreferences.edit()
-        editor.putString(PASSWORD_ALGORITHM_PREFERENCE_KEY, algorithm.value)
-        editor.apply()
-    }
-
-    private fun getSalt(): String {
-        var salt = sharedPreferences.getString(PASSWORD_SALT_PREFERENCE_KEY, null)
-        if (salt == null) {
-            salt = generateSalt()
-            setSalt(salt)
+        if (enteredPinCode.length != settingsManager.getPinLength()) return false
+        val savedVerifier = loadPinCode() ?: return false
+        if (pinCodeHasher.isVersionedRecord(savedVerifier)) {
+            return pinCodeHasher.verify(enteredPinCode, savedVerifier)
         }
-        return salt
-    }
 
-    private fun setSalt(salt: String) {
-        val editor = sharedPreferences.edit()
-        editor.putString(PASSWORD_SALT_PREFERENCE_KEY, salt)
-        editor.apply()
-    }
-
-    private fun generateSalt(): String {
-        val salt = ByteArray(KEY_LENGTH)
-        return try {
-            val sr =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) SecureRandom.getInstanceStrong()
-                else SecureRandom.getInstance("SHA1PRNG")
-            sr.nextBytes(salt)
-            Base64.encodeToString(salt, Base64.DEFAULT)
-        } catch (e: Exception) {
-            DEFAULT_PASSWORD_SALT
+        val salt = sharedPreferences.getString(PASSWORD_SALT_PREFERENCE_KEY, null)
+            ?: return false
+        val legacyVerifier = Encryptor().getSHA(salt + enteredPinCode + salt, Algorithm.SHA256)
+        val isCorrect = MessageDigest.isEqual(
+            savedVerifier.toByteArray(Charsets.UTF_8),
+            legacyVerifier.toByteArray(Charsets.UTF_8)
+        )
+        if (isCorrect) {
+            savePinCode(enteredPinCode)
         }
+        return isCorrect
     }
 
     companion object {
         private const val PREFS_NAME = "PinCodePrefs"
         private const val PIN_CODE_KEY = "pin_code"
-        private const val DEFAULT_PASSWORD_SALT = "7xn7@c$"
-        private const val KEY_LENGTH = 256
         private const val PASSWORD_SALT_PREFERENCE_KEY = "PASSWORD_SALT_PREFERENCE_KEY"
         private const val PASSWORD_ALGORITHM_PREFERENCE_KEY = "ALGORITHM"
     }

@@ -1,87 +1,81 @@
 package com.android.pinlibrary.ui.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import com.android.pinlibrary.R
 import com.android.pinlibrary.ui.components.PinCodeContent
 import com.android.pinlibrary.utils.preferences.AttemptCounter
 import com.android.pinlibrary.utils.preferences.PinCodeManager
 import com.android.pinlibrary.utils.state.PinCodeStateManager
 import com.android.pinlibrary.utils.state.deletepin.DeletePinScreenIntent
-import com.android.pinlibrary.utils.state.deletepin.DeletePinScreenState
 import com.android.pinlibrary.viewmodel.PinViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun DeletePinScreen(
     viewModel: PinViewModel,
     pinCodeStateManager: PinCodeStateManager
 ) {
-
     val context = LocalContext.current
-    val pinCodeManager = PinCodeManager(context = context)
-    val attemptCounter = AttemptCounter(context = context)
-    var isInitScenario by remember { mutableStateOf(false) }
-    var isError by remember { mutableStateOf(false) }
-    var headerId by remember { mutableIntStateOf(R.string.pin_code_step_create) }
-    val notificationText = stringResource(id = R.string.empty)
-    var notification by remember { mutableStateOf(notificationText) }
-    val forgotMessageId by remember { mutableIntStateOf(R.string.pin_code_forgot_text) }
+    val pinCodeManager = remember(context) { PinCodeManager(context) }
+    val attemptCounter = remember(context) { AttemptCounter(context) }
+    val coroutineScope = rememberCoroutineScope()
+    var attempts by remember { mutableIntStateOf(attemptCounter.getAttempts()) }
+    var notification by remember { mutableStateOf("") }
+    var isProcessing by remember { mutableStateOf(false) }
+    var isCompleted by remember { mutableStateOf(false) }
+    var exhaustionReported by remember { mutableStateOf(false) }
 
-    if (!isInitScenario) {
+    LaunchedEffect(Unit) {
         viewModel.processIntent(DeletePinScreenIntent.InitialState)
-        isInitScenario = true
-    }
-
-    when (val state = viewModel.deletePinScreenState.observeAsState().value) {
-        is DeletePinScreenState.InitialState -> {
-            headerId = R.string.pin_code_step_unlock
+        if (attempts == 0 && !exhaustionReported) {
+            notification = context.getString(R.string.pin_code_attempts, 0)
+            exhaustionReported = true
+            pinCodeStateManager.setLoginAttemptsExpended()
         }
-
-        is DeletePinScreenState.EnteringPinState -> {
-            if (pinCodeManager.isPinCodeCorrect(state.pin)) {
-                viewModel.processIntent(DeletePinScreenIntent.DeletePin)
-                attemptCounter.resetAttempts()
-            } else {
-                if (!isError) {
-                    attemptCounter.decrementAttempts()
-                    notification = stringResource(
-                        id = R.string.pin_code_attempts,
-                        attemptCounter.getAttempts()
-                    )
-                    if (attemptCounter.getAttempts() == 0) {
-                        pinCodeStateManager.setLoginAttemptsExpended()
-                    }
-                    isError = true
-                }
-            }
-        }
-
-        is DeletePinScreenState.PinDeletedState -> {
-            pinCodeStateManager.setDeletionSuccess(true)
-        }
-
-        is DeletePinScreenState.ErrorState -> {
-            pinCodeStateManager.setDeletionSuccess(false)
-        }
-
-        else -> {}
     }
 
     PinCodeContent(
-        headerId = headerId,
+        headerId = R.string.pin_code_step_unlock,
         notification = notification,
-        forgotMessageId = forgotMessageId,
-        pinCodeStateManager = pinCodeStateManager
-    ) {
-        val pinCode = it.toList().joinToString("")
+        forgotMessageId = R.string.pin_code_forgot_text,
+        pinCodeStateManager = pinCodeStateManager,
+        enabled = !isProcessing && !isCompleted && attempts > 0
+    ) { pinValue ->
+        if (isProcessing || isCompleted || attempts == 0) return@PinCodeContent
+        val pinCode = pinValue.joinToString("")
+        isProcessing = true
         viewModel.processIntent(DeletePinScreenIntent.EnterPin(pinCode))
-        isError = false
+        coroutineScope.launch {
+            val isCorrect = withContext(Dispatchers.Default) {
+                pinCodeManager.isPinCodeCorrect(pinCode)
+            }
+            if (isCorrect) {
+                pinCodeManager.clearPinCode()
+                attemptCounter.resetAttempts()
+                attempts = attemptCounter.getAttempts()
+                isCompleted = true
+                viewModel.processIntent(DeletePinScreenIntent.DeletePin)
+                pinCodeStateManager.setDeletionSuccess(true)
+            } else {
+                attemptCounter.decrementAttempts()
+                attempts = attemptCounter.getAttempts()
+                notification = context.getString(R.string.pin_code_attempts, attempts)
+                if (attempts == 0 && !exhaustionReported) {
+                    exhaustionReported = true
+                    pinCodeStateManager.setLoginAttemptsExpended()
+                }
+            }
+            isProcessing = false
+        }
     }
 }

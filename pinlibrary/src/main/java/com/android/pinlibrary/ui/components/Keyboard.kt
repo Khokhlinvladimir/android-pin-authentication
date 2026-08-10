@@ -19,7 +19,14 @@ import com.android.pinlibrary.utils.keyboard.KeyboardButtonEnum
 import com.android.pinlibrary.utils.preferences.SettingsManager
 
 @Composable
-fun Keyboard(pinCodeScenario: PinCodeScenario) {
+fun Keyboard(pinCodeScenario: PinCodeScenario) = Keyboard(pinCodeScenario, true) {}
+
+@Composable
+fun Keyboard(
+    pinCodeScenario: PinCodeScenario,
+    enabled: Boolean,
+    onButtonClick: (KeyboardButtonEnum) -> Unit
+) {
 
     val rowModifier = Modifier.wrapContentSize()
 
@@ -38,15 +45,21 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
         ) {
             NumberButton(
                 stringResource(id = R.string.button1_large_text),
-                KeyboardButtonEnum.BUTTON_1
+                KeyboardButtonEnum.BUTTON_1,
+                enabled,
+                onButtonClick
             )
             NumberButton(
                 stringResource(id = R.string.button2_large_text),
-                KeyboardButtonEnum.BUTTON_2
+                KeyboardButtonEnum.BUTTON_2,
+                enabled,
+                onButtonClick
             )
             NumberButton(
                 stringResource(id = R.string.button3_large_text),
-                KeyboardButtonEnum.BUTTON_3
+                KeyboardButtonEnum.BUTTON_3,
+                enabled,
+                onButtonClick
             )
         }
         Row(
@@ -54,15 +67,21 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
         ) {
             NumberButton(
                 stringResource(id = R.string.button4_large_text),
-                KeyboardButtonEnum.BUTTON_4
+                KeyboardButtonEnum.BUTTON_4,
+                enabled,
+                onButtonClick
             )
             NumberButton(
                 stringResource(id = R.string.button5_large_text),
-                KeyboardButtonEnum.BUTTON_5
+                KeyboardButtonEnum.BUTTON_5,
+                enabled,
+                onButtonClick
             )
             NumberButton(
                 stringResource(id = R.string.button6_large_text),
-                KeyboardButtonEnum.BUTTON_6
+                KeyboardButtonEnum.BUTTON_6,
+                enabled,
+                onButtonClick
             )
         }
         Row(
@@ -70,15 +89,21 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
         ) {
             NumberButton(
                 stringResource(id = R.string.button7_large_text),
-                KeyboardButtonEnum.BUTTON_7
+                KeyboardButtonEnum.BUTTON_7,
+                enabled,
+                onButtonClick
             )
             NumberButton(
                 stringResource(id = R.string.button8_large_text),
-                KeyboardButtonEnum.BUTTON_8
+                KeyboardButtonEnum.BUTTON_8,
+                enabled,
+                onButtonClick
             )
             NumberButton(
                 stringResource(id = R.string.button9_large_text),
-                KeyboardButtonEnum.BUTTON_9
+                KeyboardButtonEnum.BUTTON_9,
+                enabled,
+                onButtonClick
             )
         }
         Row(
@@ -92,18 +117,24 @@ fun Keyboard(pinCodeScenario: PinCodeScenario) {
                 ) {
                 ImageButton(
                     if (isSystemInDarkTheme()) R.drawable.ic_fingerprint_white_30 else R.drawable.ic_fingerprint_30,
-                    KeyboardButtonEnum.BUTTON_FINGERPRINT
+                    KeyboardButtonEnum.BUTTON_FINGERPRINT,
+                    enabled,
+                    onButtonClick
                 )
             } else {
                 ImageButtonStub(R.drawable.ic_fingerprint_transparent_30)
             }
             NumberButton(
                 stringResource(id = R.string.button0_large_text),
-                KeyboardButtonEnum.BUTTON_0
+                KeyboardButtonEnum.BUTTON_0,
+                enabled,
+                onButtonClick
             )
             ImageButton(
                 if (isSystemInDarkTheme()) R.drawable.ic_clear_white_30 else R.drawable.ic_clear_30,
-                KeyboardButtonEnum.BUTTON_CLEAR
+                KeyboardButtonEnum.BUTTON_CLEAR,
+                enabled,
+                onButtonClick
             )
         }
     }

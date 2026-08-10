@@ -19,6 +19,7 @@
     <string name="button9_large_text" translatable="false">9</string>
     <string name="button9_small_text" translatable="false">WXYZ</string>
     <string name="empty" translatable="false" />
+    <string name="pin_code_storage_error">Не удалось сохранить PIN. Попробуйте ещё раз.</string>
 
     <string name="pin_code_forgot_text">Забыли PIN-код?</string>
     <string name="pin_code_step_disable">Отключите %d-значный пин-код</string>

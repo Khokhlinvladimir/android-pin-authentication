@@ -43,6 +43,8 @@
     <string name="forgot_pin">Забыли PIN-код?</string>
     <string name="forgot_pin_instruction">Если вы забыли свой PIN-код, вы можете восстановить его, заново пройдя авторизацию.</string>
     <string name="ok_button">Ок</string>
+    <string name="pin_code_already_configured">PIN-код уже настроен</string>
+    <string name="pin_code_not_configured">PIN-код не настроен</string>
 </resources>
 
 

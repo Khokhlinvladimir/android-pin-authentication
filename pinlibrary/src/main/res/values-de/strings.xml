@@ -22,4 +22,6 @@
     <string name="forgot_pin_instruction">Wenn Sie Ihren PIN vergessen haben, können Sie ihn durch erneute Authentifizierung zurücksetzen</string>
     <string name="ok_button">OK</string>
     <string name="pin_code_storage_error">PIN konnte nicht gespeichert werden. Versuchen Sie es erneut.</string>
+    <string name="pin_code_already_configured">PIN ist bereits eingerichtet</string>
+    <string name="pin_code_not_configured">Kein PIN eingerichtet</string>
 </resources>

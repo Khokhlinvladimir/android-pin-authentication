@@ -138,6 +138,39 @@ Surface(
 
 These are the basic steps to use the library for PIN authentication in your Android application. Customize the library and handle events according to your needs to create a secure and seamless user experience.
 
+## Experimental controller API (2.0.0-alpha01)
+
+The new API is state-driven, does not depend on the process-global `PinCodeStateManager`, and can be tested with custom stores. The legacy API above remains available during migration.
+
+```kotlin
+val controller = remember {
+    PinAuthController.create(
+        context,
+        PinAuthConfig(
+            pinLength = 4,
+            maxAttempts = 5,
+            biometricEnabled = false,
+            autoLaunchBiometric = false
+        )
+    )
+}
+
+PinAuthScreen(
+    controller = controller,
+    scenario = PinAuthScenario.VALIDATION,
+    onResult = { result ->
+        when (result) {
+            PinAuthResult.Validated -> openProtectedContent()
+            PinAuthResult.AttemptsExhausted -> startAccountRecovery()
+            PinAuthResult.ResetRequested -> startAccountRecovery()
+            else -> Unit
+        }
+    }
+)
+```
+
+`PinAuthController.state` exposes immutable `StateFlow<PinAuthUiState>`. Terminal events are delivered through `results`, while `dispatch` accepts typed digit, backspace, and reset actions. Biometric support for this entry point will be added in a later alpha.
+
 ## Security and migration notes
 
 - Version 1.0.6 stores a versioned PBKDF2 verifier with a random per-PIN salt. Existing SHA-256 records are migrated automatically after the first successful validation.

@@ -22,4 +22,6 @@
     <string name="forgot_pin_instruction">PIN kodunuzu unuttuysanız, yeniden yetkilendirme yaparak sıfırlayabilirsiniz</string>
     <string name="ok_button">Tamam</string>
     <string name="pin_code_storage_error">PIN saklanamadı. Tekrar deneyin.</string>
+    <string name="pin_code_already_configured">PIN zaten ayarlanmış</string>
+    <string name="pin_code_not_configured">PIN ayarlanmamış</string>
 </resources>

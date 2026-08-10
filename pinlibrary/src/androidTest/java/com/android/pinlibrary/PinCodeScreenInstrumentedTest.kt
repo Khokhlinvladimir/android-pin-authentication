@@ -7,6 +7,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.pinlibrary.api.PinAuthConfig
+import com.android.pinlibrary.api.PinAuthController
+import com.android.pinlibrary.api.PinAuthResult
+import com.android.pinlibrary.api.PinAuthScenario
+import com.android.pinlibrary.ui.screens.PinAuthScreen
 import com.android.pinlibrary.ui.screens.PinCodeScreen
 import com.android.pinlibrary.utils.enums.PinCodeScenario
 import com.android.pinlibrary.utils.preferences.AttemptCounter
@@ -113,6 +118,36 @@ class PinCodeScreenInstrumentedTest {
 
         assertEquals(0, AttemptCounter(application).getAttempts())
         assertFalse(validationSucceeded.get())
+    }
+
+    @Test
+    fun controllerApiCreatesPinThroughComposeScreen() {
+        val creationSucceeded = AtomicBoolean(false)
+        val controller = PinAuthController.create(
+            application,
+            PinAuthConfig(
+                pinLength = 4,
+                maxAttempts = 3,
+                biometricEnabled = false,
+                autoLaunchBiometric = false
+            )
+        )
+        composeRule.setContent {
+            PinAuthScreen(
+                controller = controller,
+                scenario = PinAuthScenario.CREATION,
+                onResult = { result ->
+                    if (result == PinAuthResult.Created) creationSucceeded.set(true)
+                }
+            )
+        }
+
+        enterPin("1357")
+        enterPin("1357")
+        composeRule.waitUntil(10_000) { creationSucceeded.get() }
+
+        assertTrue(PinCodeManager(application).isPinCodeCorrect("1357"))
+        controller.close()
     }
 
     private fun enterPin(pin: String) {

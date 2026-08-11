@@ -138,7 +138,7 @@ Surface(
 
 These are the basic steps to use the library for PIN authentication in your Android application. Customize the library and handle events according to your needs to create a secure and seamless user experience.
 
-## Experimental controller API (2.0.0-alpha01)
+## Experimental controller API (2.0.0-alpha02)
 
 The new API is state-driven, does not depend on the process-global `PinCodeStateManager`, and can be tested with custom stores. The legacy API above remains available during migration.
 
@@ -158,6 +158,7 @@ val controller = remember {
 PinAuthScreen(
     controller = controller,
     scenario = PinAuthScenario.VALIDATION,
+    motionSpec = PinAuthMotionSpec.Premium,
     onResult = { result ->
         when (result) {
             PinAuthResult.Validated -> openProtectedContent()
@@ -169,7 +170,7 @@ PinAuthScreen(
 )
 ```
 
-`PinAuthController.state` exposes immutable `StateFlow<PinAuthUiState>`. Terminal events are delivered through `results`, while `dispatch` accepts typed digit, backspace, and reset actions. Biometric support for this entry point will be added in a later alpha.
+`PinAuthController.state` exposes immutable `StateFlow<PinAuthUiState>`. Terminal events are delivered through `results`, while `dispatch` accepts typed digit, backspace, and reset actions. `PinAuthMotionSpec.Premium` enables animated dots, step transitions, error shake, processing pulse, success feedback, keypad press motion, haptics, and the ambient background. Use `PinAuthMotionSpec.None` for a fully static surface, or copy `Premium` to customize individual timings and effects. Biometric support for this entry point will be added in a later alpha.
 
 ## Security and migration notes
 

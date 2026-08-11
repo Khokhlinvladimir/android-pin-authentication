@@ -2,9 +2,20 @@ package com.android.pinlibrary.ui.components
 
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -16,9 +27,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.android.pinlibrary.ui.systemdesign.indicator.RoundedBoxesRow
+import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
+import com.android.pinlibrary.ui.systemdesign.indicator.PinIndicatorFeedback
 import com.android.pinlibrary.utils.biometric.BiometricScannerScreen
 import com.android.pinlibrary.utils.enums.PinCodeScenario
 import com.android.pinlibrary.utils.helpers.fillArrayWithButtons
@@ -113,9 +127,40 @@ fun PinCodeContent(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        PinCodeScreenHeader(stringResource(id = headerId))
-        PinCodeScreenNotification(text = notification)
-        RoundedBoxesRow(startQuantity = pinLength, quantity = quantity)
+        AnimatedContent(
+            targetState = headerId,
+            transitionSpec = {
+                (slideInHorizontally(tween(280)) { it / 3 } + fadeIn()) togetherWith
+                    (slideOutHorizontally(tween(220)) { -it / 3 } + fadeOut())
+            },
+            label = "legacy-pin-step"
+        ) { currentHeaderId ->
+            PinCodeScreenHeader(stringResource(id = currentHeaderId))
+        }
+        Box(modifier = Modifier.height(64.dp), contentAlignment = Alignment.Center) {
+            AnimatedContent(
+                targetState = notification,
+                transitionSpec = {
+                    (slideInVertically(tween(170)) { it / 3 } + fadeIn()) togetherWith
+                        (slideOutVertically(tween(120)) { -it / 3 } + fadeOut())
+                },
+                label = "legacy-pin-notification"
+            ) { currentNotification ->
+                PinCodeScreenNotification(text = currentNotification)
+            }
+        }
+        RoundedBoxesRow(
+            startQuantity = pinLength,
+            quantity = quantity,
+            feedback = if (notification.isNotEmpty()) {
+                PinIndicatorFeedback.ERROR
+            } else {
+                PinIndicatorFeedback.NORMAL
+            },
+            feedbackToken = notification,
+            isProcessing = !enabled && notification.isEmpty(),
+            motionSpec = PinAuthMotionSpec.Premium
+        )
         Keyboard(
             pinCodeScenario = pinCodeScenario,
             enabled = enabled,

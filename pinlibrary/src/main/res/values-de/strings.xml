@@ -12,6 +12,10 @@
     <string name="pin_code_attempts">Falsche PIN. Versuche übrig: %1$d</string>
     <string name="pin_codes_do_not_match">PIN-Codes stimmen nicht überein</string>
     <string name="password_successfully_saved">Passwort erfolgreich gespeichert</string>
+    <string name="pin_code_success_created">PIN erstellt</string>
+    <string name="pin_code_success_validated">Zugriff gewährt</string>
+    <string name="pin_code_success_changed">PIN geändert</string>
+    <string name="pin_code_success_deleted">PIN gelöscht</string>
 
     <string name="authorization">Authentifizierung</string>
     <string name="use_biometry">Verwenden Sie die Biometrie zur Authentifizierung</string>

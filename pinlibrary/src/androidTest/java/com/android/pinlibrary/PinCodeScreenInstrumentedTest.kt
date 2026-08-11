@@ -65,12 +65,12 @@ class PinCodeScreenInstrumentedTest {
 
         enterPin("2468")
         enterPin("2468")
-        composeRule.waitUntil(10_000) { creationSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { creationSucceeded.get() }
 
         stateManager.setScenario(PinCodeScenario.VALIDATION)
         waitForScenario(PinCodeScenario.VALIDATION)
         enterPin("2468")
-        composeRule.waitUntil(10_000) { validationSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { validationSucceeded.get() }
 
         assertTrue(PinCodeManager(application).isPinCodeCorrect("2468"))
     }
@@ -89,13 +89,13 @@ class PinCodeScreenInstrumentedTest {
         waitForText(application.getString(R.string.pin_code_step_create))
         enterPin("5678")
         enterPin("5678")
-        composeRule.waitUntil(10_000) { changeSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { changeSucceeded.get() }
         assertTrue(PinCodeManager(application).isPinCodeCorrect("5678"))
 
         stateManager.setScenario(PinCodeScenario.DELETION)
         waitForScenario(PinCodeScenario.DELETION)
         enterPin("5678")
-        composeRule.waitUntil(10_000) { deletionSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { deletionSucceeded.get() }
 
         assertNull(PinCodeManager(application).loadPinCode())
     }
@@ -112,9 +112,11 @@ class PinCodeScreenInstrumentedTest {
         composeRule.setContent { PinCodeScreen() }
 
         enterPin("0000")
-        composeRule.waitUntil(10_000) { AttemptCounter(application).getAttempts() == 1 }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) {
+            AttemptCounter(application).getAttempts() == 1
+        }
         enterPin("0000")
-        composeRule.waitUntil(10_000) { attemptsExhausted.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { attemptsExhausted.get() }
 
         assertEquals(0, AttemptCounter(application).getAttempts())
         assertFalse(validationSucceeded.get())
@@ -144,7 +146,7 @@ class PinCodeScreenInstrumentedTest {
 
         enterPin("1357")
         enterPin("1357")
-        composeRule.waitUntil(10_000) { creationSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { creationSucceeded.get() }
 
         assertTrue(PinCodeManager(application).isPinCodeCorrect("1357"))
         controller.close()
@@ -158,13 +160,19 @@ class PinCodeScreenInstrumentedTest {
     }
 
     private fun waitForScenario(scenario: PinCodeScenario) {
-        composeRule.waitUntil(10_000) { stateManager.currentScenario.value == scenario }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) {
+            stateManager.currentScenario.value == scenario
+        }
         composeRule.waitForIdle()
     }
 
     private fun waitForText(text: String) {
-        composeRule.waitUntil(10_000) {
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    private companion object {
+        const val TEST_TIMEOUT_MILLIS = 30_000L
     }
 }

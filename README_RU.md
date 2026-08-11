@@ -138,6 +138,23 @@ Surface(
 
 Это основные шаги по использованию библиотеки для аутентификации по PIN-коду в вашем Android-приложении. Настраивайте библиотеку и обрабатывайте события в соответствии с вашими потребностями для создания безопасного и удобного опыта для пользователей.
 
+## Экспериментальный API контроллера (2.0.0-alpha02)
+
+Новый API работает через неизменяемый `StateFlow`, не зависит от глобального `PinCodeStateManager` и поддерживает настраиваемую motion-систему.
+
+```kotlin
+PinAuthScreen(
+    controller = controller,
+    scenario = PinAuthScenario.VALIDATION,
+    motionSpec = PinAuthMotionSpec.Premium,
+    onResult = { result ->
+        if (result == PinAuthResult.Validated) openProtectedContent()
+    }
+)
+```
+
+`PinAuthMotionSpec.Premium` включает пружинный ввод PIN, анимацию удаления, shake при ошибке, пульсацию во время проверки, success-состояние, анимации клавиатуры, haptic feedback и фоновое свечение. Для полностью статичного интерфейса используйте `PinAuthMotionSpec.None`.
+
 ## Безопасность и миграция
 
 - Начиная с версии 1.0.6 библиотека хранит версионированный PBKDF2-verifier с индивидуальной случайной солью. Старые записи SHA-256 автоматически мигрируют после первого успешного ввода PIN.

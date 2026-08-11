@@ -12,6 +12,10 @@
     <string name="pin_code_attempts">Yanlış PIN. Kalan deneme sayısı: %1$d</string>
     <string name="pin_codes_do_not_match">PIN kodları uyuşmuyor</string>
     <string name="password_successfully_saved">Parola başarıyla kaydedildi</string>
+    <string name="pin_code_success_created">PIN oluşturuldu</string>
+    <string name="pin_code_success_validated">Erişim onaylandı</string>
+    <string name="pin_code_success_changed">PIN değiştirildi</string>
+    <string name="pin_code_success_deleted">PIN silindi</string>
 
     <string name="authorization">Yetkilendirme</string>
     <string name="use_biometry">Yetkilendirme için biyometriyi kullanın</string>

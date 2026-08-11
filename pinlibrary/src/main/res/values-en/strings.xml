@@ -12,6 +12,10 @@
     <string name="pin_code_attempts">Incorrect PIN. Attempts left: %1$d</string>
     <string name="pin_codes_do_not_match">PIN codes do not match</string>
     <string name="password_successfully_saved">Password successfully saved</string>
+    <string name="pin_code_success_created">PIN created</string>
+    <string name="pin_code_success_validated">Access granted</string>
+    <string name="pin_code_success_changed">PIN changed</string>
+    <string name="pin_code_success_deleted">PIN deleted</string>
     <string name="pin_code_storage_error">Unable to store PIN. Try again.</string>
 
     <string name="authorization">Authorization</string>

@@ -58,7 +58,7 @@ private fun MotionDemo() {
             config = PinAuthConfig(
                 pinLength = 4,
                 maxAttempts = 4,
-                biometricEnabled = false,
+                biometricEnabled = true,
                 autoLaunchBiometric = false
             )
         )

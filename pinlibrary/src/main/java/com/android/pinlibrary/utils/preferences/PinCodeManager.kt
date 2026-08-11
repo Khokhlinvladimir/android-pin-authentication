@@ -4,15 +4,17 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.android.pinlibrary.utils.encryption.Encryptor
 import com.android.pinlibrary.utils.encryption.PinCodeHasher
+import com.android.pinlibrary.utils.encryption.PinCodeProtector
 import com.android.pinlibrary.utils.encryption.enums.Algorithm
 import java.security.MessageDigest
 
 class PinCodeManager internal constructor(
     context: Context,
-    private val pinCodeHasher: PinCodeHasher
+    private val pinCodeHasher: PinCodeHasher,
+    private val pinCodeProtector: PinCodeProtector
 ) : IPinCodeManager {
 
-    constructor(context: Context) : this(context, PinCodeHasher())
+    constructor(context: Context) : this(context, PinCodeHasher(), PinCodeProtector())
 
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -22,7 +24,7 @@ class PinCodeManager internal constructor(
         require(pinCode.length == settingsManager.getPinLength()) {
             "PIN code length must match the configured PIN length"
         }
-        val verifier = pinCodeHasher.create(pinCode)
+        val verifier = pinCodeProtector.create(pinCode)
         sharedPreferences.edit()
             .putString(PIN_CODE_KEY, verifier)
             .remove(PASSWORD_SALT_PREFERENCE_KEY)
@@ -40,13 +42,19 @@ class PinCodeManager internal constructor(
             .remove(PASSWORD_SALT_PREFERENCE_KEY)
             .remove(PASSWORD_ALGORITHM_PREFERENCE_KEY)
             .apply()
+        runCatching { pinCodeProtector.deleteKey() }
     }
 
     override fun isPinCodeCorrect(enteredPinCode: String): Boolean {
         if (enteredPinCode.length != settingsManager.getPinLength()) return false
         val savedVerifier = loadPinCode() ?: return false
+        if (pinCodeProtector.isVersionedRecord(savedVerifier)) {
+            return pinCodeProtector.verify(enteredPinCode, savedVerifier)
+        }
         if (pinCodeHasher.isVersionedRecord(savedVerifier)) {
-            return pinCodeHasher.verify(enteredPinCode, savedVerifier)
+            val isCorrect = pinCodeHasher.verify(enteredPinCode, savedVerifier)
+            if (isCorrect) savePinCode(enteredPinCode)
+            return isCorrect
         }
 
         val salt = sharedPreferences.getString(PASSWORD_SALT_PREFERENCE_KEY, null)

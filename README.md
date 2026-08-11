@@ -149,7 +149,7 @@ val controller = remember {
         PinAuthConfig(
             pinLength = 4,
             maxAttempts = 5,
-            biometricEnabled = false,
+            biometricEnabled = true,
             autoLaunchBiometric = false
         )
     )
@@ -170,15 +170,15 @@ PinAuthScreen(
 )
 ```
 
-`PinAuthController.state` exposes immutable `StateFlow<PinAuthUiState>`. Terminal events are delivered through `results`, while `dispatch` accepts typed digit, backspace, and reset actions. `PinAuthMotionSpec.Premium` enables animated dots, step transitions, error shake, processing pulse, success feedback, keypad press motion, haptics, and the ambient background. Use `PinAuthMotionSpec.None` for a fully static surface, or copy `Premium` to customize individual timings and effects. Biometric support for this entry point will be added in a later alpha.
+`PinAuthController.state` exposes immutable `StateFlow<PinAuthUiState>`. Terminal events are delivered through `results`, while `dispatch` accepts typed digit, backspace, biometric, and reset actions. `PinAuthMotionSpec.Premium` enables animated dots, step transitions, error shake, processing pulse, success feedback, keypad press motion, haptics, and the ambient background. Use `PinAuthMotionSpec.None` for a fully static surface, or copy `Premium` to customize individual timings and effects. When enabled and enrolled on the device, biometrics are available during PIN validation. Forgotten-PIN recovery is emitted only after the user confirms the dialog.
 
 ## Security and migration notes
 
-- Version 1.0.6 stores a versioned PBKDF2 verifier with a random per-PIN salt. Existing SHA-256 records are migrated automatically after the first successful validation.
+- New PIN records use an HMAC verifier protected by a non-exportable Android Keystore key. Existing PBKDF2 and legacy SHA-256 records are migrated automatically after their first successful validation.
 - PIN verification and storage run off the Compose UI thread.
 - When the configured attempt limit is exhausted, PIN input stays locked across process restarts. The host application must provide recovery through `onResetPassword` and `clearConfiguration`.
 - PIN length must be between 4 and 12 digits. The maximum attempt count must be between 1 and 100.
-- A local PIN is an application lock, not a replacement for server-side authentication. Applications storing sensitive data should additionally protect cryptographic keys with Android Keystore and exclude PIN-related preferences from backup.
+- A local PIN is an application lock, not a replacement for server-side authentication. Applications storing sensitive data should also exclude PIN-related preferences from backup.
 
 ## Technical specifications:
 

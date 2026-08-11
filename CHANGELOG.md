@@ -7,6 +7,8 @@
 - Add spring press feedback, bounded ripple, disabled transitions, and optional haptics to the keypad.
 - Add animated title, notification, scenario, and host-screen transitions.
 - Add a subtle animated security background to the state-driven API.
+- Replace slow runtime PBKDF2 checks with Android Keystore-backed HMAC verification and migrate older verifiers after a successful check.
+- Restore biometric validation and the confirmation dialog for forgotten-PIN recovery in the controller UI.
 - Preserve the existing `PinAuthScreen`, `PinAuthContent`, `Keyboard`, and legacy screen signatures.
 
 ## 2.0.0-alpha01

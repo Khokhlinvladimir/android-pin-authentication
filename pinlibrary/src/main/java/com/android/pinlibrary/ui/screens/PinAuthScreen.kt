@@ -1,7 +1,9 @@
 package com.android.pinlibrary.ui.screens
 
+import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.view.HapticFeedbackConstants
+import androidx.biometric.BiometricManager
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.RepeatMode
@@ -30,12 +32,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -43,6 +51,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -60,6 +69,7 @@ import com.android.pinlibrary.ui.components.PinCodeScreenNotification
 import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
 import com.android.pinlibrary.ui.systemdesign.indicator.PinIndicatorFeedback
 import com.android.pinlibrary.ui.systemdesign.indicator.RoundedBoxesRow
+import com.android.pinlibrary.utils.biometric.BiometricScannerScreen
 import com.android.pinlibrary.utils.enums.PinCodeScenario
 import com.android.pinlibrary.utils.keyboard.KeyboardButtonEnum
 import kotlinx.coroutines.delay
@@ -94,6 +104,32 @@ fun PinAuthScreen(
     val state by controller.state.collectAsState()
     val scope = rememberCoroutineScope()
     val currentOnResult by rememberUpdatedState(onResult)
+    val context = LocalContext.current
+    var showBiometricScreen by remember(controller, scenario) { mutableStateOf(false) }
+    val biometricAvailable = remember(context, controller, scenario) {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
+            controller.config.biometricEnabled &&
+            scenario == PinAuthScenario.VALIDATION &&
+            BiometricManager.from(context).canAuthenticate(
+                BiometricManager.Authenticators.BIOMETRIC_WEAK
+            ) == BiometricManager.BIOMETRIC_SUCCESS
+    }
+    val biometricCallback = remember(controller, scope) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
+                    showBiometricScreen = false
+                }
+
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                    showBiometricScreen = false
+                    scope.launch { controller.dispatch(PinAuthAction.BiometricAuthenticated) }
+                }
+            }
+        } else {
+            null
+        }
+    }
 
     LaunchedEffect(controller, motionSpec) {
         controller.results.collect { result ->
@@ -106,10 +142,27 @@ fun PinAuthScreen(
     LaunchedEffect(controller, scenario) {
         controller.start(scenario)
     }
+    LaunchedEffect(controller, scenario, biometricAvailable) {
+        showBiometricScreen = biometricAvailable && controller.config.autoLaunchBiometric
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
+        showBiometricScreen &&
+        biometricAvailable &&
+        biometricCallback != null
+    ) {
+        BiometricScannerScreen(authenticationCallback = biometricCallback)
+    }
 
     PinAuthContent(
         state = state,
-        onAction = { action -> scope.launch { controller.dispatch(action) } },
+        onAction = { action ->
+            if (action == PinAuthAction.RequestBiometric) {
+                if (biometricAvailable) showBiometricScreen = true
+            } else {
+                scope.launch { controller.dispatch(action) }
+            }
+        },
         motionSpec = motionSpec,
         modifier = modifier
     )
@@ -137,6 +190,7 @@ fun PinAuthContent(
     modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
+    var showResetDialog by rememberSaveable(state.scenario) { mutableStateOf(false) }
     val feedback = state.indicatorFeedback()
     val keyboardAlpha by animateFloatAsState(
         targetValue = when {
@@ -239,13 +293,15 @@ fun PinAuthContent(
                 }
             ) {
                 Keyboard(
-                    pinCodeScenario = PinCodeScenario.STUB,
+                    pinCodeScenario = state.scenario.toLegacyScenario(),
                     enabled = state.isInputEnabled,
                     motionSpec = motionSpec,
                     onButtonClick = { button ->
                         when (button) {
                             KeyboardButtonEnum.BUTTON_CLEAR -> onAction(PinAuthAction.Backspace)
-                            KeyboardButtonEnum.BUTTON_FINGERPRINT -> Unit
+                            KeyboardButtonEnum.BUTTON_FINGERPRINT -> {
+                                onAction(PinAuthAction.RequestBiometric)
+                            }
                             else -> onAction(PinAuthAction.Digit(button.buttonValue))
                         }
                     }
@@ -265,13 +321,44 @@ fun PinAuthContent(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .clickable(enabled = !state.isProcessing) {
-                            onAction(PinAuthAction.RequestReset)
+                            showResetDialog = true
                         }
                         .padding(16.dp)
                 )
             }
         }
+
+        if (showResetDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetDialog = false },
+                title = { Text(stringResource(R.string.forgot_pin)) },
+                text = { Text(stringResource(R.string.forgot_pin_instruction)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showResetDialog = false
+                            onAction(PinAuthAction.RequestReset)
+                        }
+                    ) {
+                        Text(stringResource(R.string.ok_button))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetDialog = false }) {
+                        Text(stringResource(R.string.cancel_action))
+                    }
+                }
+            )
+        }
     }
+}
+
+private fun PinAuthScenario?.toLegacyScenario(): PinCodeScenario = when (this) {
+    PinAuthScenario.CREATION -> PinCodeScenario.CREATION
+    PinAuthScenario.VALIDATION -> PinCodeScenario.VALIDATION
+    PinAuthScenario.CHANGE -> PinCodeScenario.CHANGE
+    PinAuthScenario.DELETION -> PinCodeScenario.DELETION
+    null -> PinCodeScenario.STUB
 }
 
 @Composable

@@ -8,9 +8,14 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.pinlibrary.api.PinAuthConfig
+import com.android.pinlibrary.api.PinAuthAction
 import com.android.pinlibrary.api.PinAuthController
 import com.android.pinlibrary.api.PinAuthResult
 import com.android.pinlibrary.api.PinAuthScenario
+import com.android.pinlibrary.api.PinAuthStep
+import com.android.pinlibrary.api.PinAuthUiState
+import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
+import com.android.pinlibrary.ui.screens.PinAuthContent
 import com.android.pinlibrary.ui.screens.PinAuthScreen
 import com.android.pinlibrary.ui.screens.PinCodeScreen
 import com.android.pinlibrary.utils.enums.PinCodeScenario
@@ -150,6 +155,34 @@ class PinCodeScreenInstrumentedTest {
 
         assertTrue(PinCodeManager(application).isPinCodeCorrect("1357"))
         controller.close()
+    }
+
+    @Test
+    fun forgotPinRequiresDialogConfirmation() {
+        val resetRequested = AtomicBoolean(false)
+        composeRule.setContent {
+            PinAuthContent(
+                state = PinAuthUiState(
+                    scenario = PinAuthScenario.VALIDATION,
+                    step = PinAuthStep.ENTER_CURRENT_PIN,
+                    pinLength = 4,
+                    remainingAttempts = 3
+                ),
+                onAction = { action ->
+                    if (action == PinAuthAction.RequestReset) resetRequested.set(true)
+                },
+                motionSpec = PinAuthMotionSpec.None
+            )
+        }
+
+        composeRule.onNodeWithText(application.getString(R.string.pin_code_forgot_text))
+            .performClick()
+        composeRule.onNodeWithText(application.getString(R.string.forgot_pin_instruction))
+            .assertExists()
+        assertFalse(resetRequested.get())
+
+        composeRule.onNodeWithText(application.getString(R.string.ok_button)).performClick()
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { resetRequested.get() }
     }
 
     private fun enterPin(pin: String) {

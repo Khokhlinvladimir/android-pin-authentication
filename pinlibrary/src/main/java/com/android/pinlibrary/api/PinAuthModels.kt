@@ -53,6 +53,8 @@ data class PinAuthUiState(
 sealed interface PinAuthAction {
     data class Digit(val value: Int) : PinAuthAction
     data object Backspace : PinAuthAction
+    data object RequestBiometric : PinAuthAction
+    data object BiometricAuthenticated : PinAuthAction
     data object RequestReset : PinAuthAction
 }
 

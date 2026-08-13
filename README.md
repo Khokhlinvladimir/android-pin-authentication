@@ -41,7 +41,7 @@ Installing a PIN authentication library is the first step to securely protecting
 
 ```gradle
 dependencies {
-    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha02'
+    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha03'
 }
 ```
 With this simple step, you will enable a powerful authentication tool in your application, making it reliable and secure.
@@ -149,7 +149,7 @@ Surface(
 
 These are the basic steps to use the library for PIN authentication in your Android application. Customize the library and handle events according to your needs to create a secure and seamless user experience.
 
-## Experimental controller API (2.0.0-alpha02)
+## Controller and customization API (2.0.0-alpha03)
 
 The new API is state-driven, does not depend on the process-global `PinCodeStateManager`, and can be tested with custom stores. The legacy API above remains available during migration.
 

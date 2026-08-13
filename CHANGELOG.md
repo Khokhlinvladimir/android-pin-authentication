@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.0.0-alpha03
 
 - Add `PinAuthCustomization`, `PinKeypadStyle`, and `PinMaskStyle` for reusable visual configuration.
 - Add composable slots for fully custom digit content and PIN masking without replacing input logic.

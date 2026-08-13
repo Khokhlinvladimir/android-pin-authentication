@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0-alpha04
+
+- Add `PinMaskStyle.showSuccessCheck` to hide the success check while preserving the merge animation.
+
 ## 2.0.0-alpha03
 
 - Add `PinAuthCustomization`, `PinKeypadStyle`, and `PinMaskStyle` for reusable visual configuration.

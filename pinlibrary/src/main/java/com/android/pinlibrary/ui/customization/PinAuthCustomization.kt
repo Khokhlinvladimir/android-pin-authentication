@@ -53,6 +53,7 @@ data class PinMaskStyle(
     val emptyColor: Color = Color.Unspecified,
     val errorColor: Color = Color.Unspecified,
     val successColor: Color = Color.Unspecified,
+    val showSuccessCheck: Boolean = true,
     val successContentColor: Color = Color.White,
     val successSize: Dp = 50.dp,
     val successStrokeWidth: Dp = 3.5.dp

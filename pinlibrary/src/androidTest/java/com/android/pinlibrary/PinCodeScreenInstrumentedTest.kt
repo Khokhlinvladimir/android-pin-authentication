@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.material3.Text
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.pinlibrary.api.PinAuthConfig
@@ -15,6 +16,7 @@ import com.android.pinlibrary.api.PinAuthScenario
 import com.android.pinlibrary.api.PinAuthStep
 import com.android.pinlibrary.api.PinAuthUiState
 import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
+import com.android.pinlibrary.ui.customization.PinAuthCustomization
 import com.android.pinlibrary.ui.screens.PinAuthContent
 import com.android.pinlibrary.ui.screens.PinAuthScreen
 import com.android.pinlibrary.ui.screens.PinCodeScreen
@@ -23,6 +25,7 @@ import com.android.pinlibrary.utils.preferences.AttemptCounter
 import com.android.pinlibrary.utils.preferences.PinCodeManager
 import com.android.pinlibrary.utils.state.PinCodeStateManager
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -183,6 +186,37 @@ class PinCodeScreenInstrumentedTest {
 
         composeRule.onNodeWithText(application.getString(R.string.ok_button)).performClick()
         composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { resetRequested.get() }
+    }
+
+    @Test
+    fun customDigitsAndMaskKeepLibraryInteractions() {
+        val dispatchedAction = AtomicReference<PinAuthAction?>()
+        composeRule.setContent {
+            PinAuthContent(
+                state = PinAuthUiState(
+                    scenario = PinAuthScenario.VALIDATION,
+                    step = PinAuthStep.ENTER_CURRENT_PIN,
+                    pinLength = 4,
+                    enteredDigits = 2,
+                    remainingAttempts = 3
+                ),
+                onAction = dispatchedAction::set,
+                motionSpec = PinAuthMotionSpec.None,
+                customization = PinAuthCustomization(
+                    digitContent = { digit, enabled, _ ->
+                        Text("custom-key-$digit-$enabled")
+                    },
+                    maskContent = { state, _, _ ->
+                        Text("custom-mask-${state.enteredDigits}/${state.totalDigits}")
+                    }
+                )
+            )
+        }
+
+        composeRule.onNodeWithText("custom-mask-2/4").assertExists()
+        composeRule.onNodeWithText("custom-key-7-true").performClick()
+
+        assertEquals(PinAuthAction.Digit(7), dispatchedAction.get())
     }
 
     private fun enterPin(pin: String) {

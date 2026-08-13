@@ -183,6 +183,39 @@ PinAuthScreen(
 
 `PinAuthController.state` exposes immutable `StateFlow<PinAuthUiState>`. Terminal events are delivered through `results`, while `dispatch` accepts typed digit, backspace, biometric, and reset actions. `PinAuthMotionSpec.Premium` enables animated dots, step transitions, error shake, processing pulse, success feedback, keypad press motion, haptics, and the ambient background. Use `PinAuthMotionSpec.None` for a fully static surface, or copy `Premium` to customize individual timings and effects. When enabled and enrolled on the device, biometrics are available during PIN validation. Forgotten-PIN recovery is emitted only after the user confirms the dialog.
 
+### Custom digits and PIN mask
+
+`PinAuthCustomization` changes keypad dimensions, colors, shape, typography, and mask appearance without copying library components:
+
+```kotlin
+val customization = PinAuthCustomization(
+    keypadStyle = PinKeypadStyle(
+        keySize = 64.dp,
+        keyShape = RoundedCornerShape(18.dp),
+        containerColor = Color(0xFF171A24),
+        contentColor = Color.White,
+        digitTextStyle = MaterialTheme.typography.headlineMedium
+    ),
+    maskStyle = PinMaskStyle(
+        dotSize = 30.dp,
+        dotRadius = 8.dp,
+        filledColor = Color(0xFF7C5CFC),
+        successColor = Color(0xFF18A566)
+    )
+)
+
+PinAuthScreen(
+    controller = controller,
+    scenario = PinAuthScenario.VALIDATION,
+    customization = customization,
+    onResult = ::handleResult
+)
+```
+
+The legacy API accepts the same object as `PinCodeScreen(customization)`.
+
+For a completely custom visual, provide `digitContent` and `maskContent` composable slots. The library still owns clicks, enabled state, haptics, accessibility, controller wiring, and PIN security. The mask receives counts and feedback state only; entered PIN values are never exposed.
+
 ## Security and migration notes
 
 - New PIN records use an HMAC verifier protected by a non-exportable Android Keystore key. Existing PBKDF2 and legacy SHA-256 records are migrated automatically after their first successful validation.

@@ -11,11 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.pinlibrary.utils.enums.PinCodeScenario
+import com.android.pinlibrary.ui.customization.PinAuthCustomization
 import com.android.pinlibrary.utils.state.PinCodeStateManager
 import com.android.pinlibrary.viewmodel.PinViewModel
 
 @Composable
-fun PinCodeScreen() {
+fun PinCodeScreen() = PinCodeScreen(PinAuthCustomization.Default)
+
+@Composable
+fun PinCodeScreen(customization: PinAuthCustomization) {
 
     val pinCodeStateManager = PinCodeStateManager.getInstance()
     val currentScenario = pinCodeStateManager.currentScenario.observeAsState()
@@ -30,13 +34,20 @@ fun PinCodeScreen() {
         label = "legacy-pin-scenario"
     ) { scenario ->
         when (scenario) {
-            PinCodeScenario.CREATION -> CreatePinScreen(pinViewModel, pinCodeStateManager)
-            PinCodeScenario.CHANGE -> ChangePinScreen(pinViewModel, pinCodeStateManager)
-            PinCodeScenario.DELETION -> DeletePinScreen(pinViewModel, pinCodeStateManager)
+            PinCodeScenario.CREATION -> CreatePinScreen(
+                pinViewModel, pinCodeStateManager, customization
+            )
+            PinCodeScenario.CHANGE -> ChangePinScreen(
+                pinViewModel, pinCodeStateManager, customization
+            )
+            PinCodeScenario.DELETION -> DeletePinScreen(
+                pinViewModel, pinCodeStateManager, customization
+            )
             PinCodeScenario.VALIDATION -> ValidationPinScreen(
                 pinViewModel,
                 pinCodeStateManager,
-                PinCodeScenario.VALIDATION
+                PinCodeScenario.VALIDATION,
+                customization
             )
 
             else -> Unit

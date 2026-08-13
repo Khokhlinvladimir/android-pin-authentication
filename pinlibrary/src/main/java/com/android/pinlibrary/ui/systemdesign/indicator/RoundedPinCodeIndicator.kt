@@ -1,7 +1,7 @@
 package com.android.pinlibrary.ui.systemdesign.indicator
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -10,9 +10,6 @@ import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
 import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
 
@@ -93,25 +91,19 @@ fun RoundedBoxesRow(
             .graphicsLayer { translationX = shake.value.dp.toPx() },
         contentAlignment = Alignment.Center
     ) {
-        AnimatedContent(
-            targetState = feedback == PinIndicatorFeedback.SUCCESS,
-            transitionSpec = {
-                fadeIn(tween(motionSpec.feedbackDurationMillis / 2)) togetherWith
-                    fadeOut(tween(motionSpec.feedbackDurationMillis / 3))
-            },
-            label = "pin-indicator-result"
-        ) { isSuccess ->
-            if (isSuccess) {
-                SuccessMark(motionSpec)
-            } else {
-                PinDots(
-                    count = startQuantity,
-                    filledCount = quantity,
-                    feedback = feedback,
-                    isProcessing = isProcessing,
-                    motionSpec = motionSpec
-                )
-            }
+        if (feedback == PinIndicatorFeedback.SUCCESS) {
+            MergingSuccessIndicator(
+                count = startQuantity,
+                motionSpec = motionSpec
+            )
+        } else {
+            PinDots(
+                count = startQuantity,
+                filledCount = quantity,
+                feedback = feedback,
+                isProcessing = isProcessing,
+                motionSpec = motionSpec
+            )
         }
     }
 }
@@ -210,64 +202,85 @@ private fun PinDot(
 }
 
 @Composable
-private fun SuccessMark(motionSpec: PinAuthMotionSpec) {
+private fun MergingSuccessIndicator(
+    count: Int,
+    motionSpec: PinAuthMotionSpec
+) {
     val progress = remember { Animatable(if (motionSpec.enabled) 0f else 1f) }
-    val successColor = MaterialTheme.colorScheme.primary
+    val initialColor = MaterialTheme.colorScheme.primary
+    val successColor = if (isSystemInDarkTheme()) {
+        Color(0xFF63E69A)
+    } else {
+        Color(0xFF168A4A)
+    }
     LaunchedEffect(motionSpec.enabled) {
         if (motionSpec.enabled) {
             progress.snapTo(0f)
             progress.animateTo(
                 1f,
-                animationSpec = tween(motionSpec.feedbackDurationMillis)
+                animationSpec = tween(
+                    durationMillis = motionSpec.feedbackDurationMillis,
+                    easing = FastOutSlowInEasing
+                )
             )
         }
     }
 
     Canvas(
         modifier = Modifier
-            .size(58.dp)
-            .graphicsLayer {
-                scaleX = 0.72f + 0.28f * progress.value
-                scaleY = 0.72f + 0.28f * progress.value
-                alpha = progress.value.coerceAtLeast(0.15f)
-            }
+            .size(width = (count * 36).dp, height = 58.dp)
     ) {
-        val stroke = 4.dp.toPx()
-        drawCircle(
-            color = successColor.copy(alpha = 0.14f + 0.16f * progress.value),
-            radius = size.minDimension / 2f
-        )
-        drawCircle(
-            color = successColor,
-            radius = size.minDimension / 2f - stroke / 2f,
-            style = Stroke(width = stroke)
-        )
-        val first = (progress.value * 2f).coerceIn(0f, 1f)
-        val second = ((progress.value - 0.5f) * 2f).coerceIn(0f, 1f)
-        val a = Offset(size.width * 0.27f, size.height * 0.52f)
-        val b = Offset(size.width * 0.44f, size.height * 0.68f)
-        val c = Offset(size.width * 0.75f, size.height * 0.34f)
-        drawLine(
-            color = successColor,
-            start = a,
-            end = Offset(
-                a.x + (b.x - a.x) * first,
-                a.y + (b.y - a.y) * first
-            ),
-            strokeWidth = stroke,
-            cap = StrokeCap.Round
-        )
-        if (second > 0f) {
+        val mergeProgress = (progress.value / 0.78f).coerceIn(0f, 1f)
+        val colorProgress = ((progress.value - 0.18f) / 0.66f).coerceIn(0f, 1f)
+        val checkProgress = ((progress.value - 0.76f) / 0.24f).coerceIn(0f, 1f)
+        val dotRadius = 11.dp.toPx()
+        val finalRadius = 25.dp.toPx()
+        val radius = dotRadius + (finalRadius - dotRadius) * mergeProgress
+        val spacing = 36.dp.toPx()
+        val center = this.center
+        val mergedColor = lerp(initialColor, successColor, colorProgress)
+
+        repeat(count.coerceAtLeast(1)) { index ->
+            val initialOffset = (index - (count - 1) / 2f) * spacing
+            drawCircle(
+                color = mergedColor,
+                radius = radius,
+                center = Offset(
+                    x = center.x + initialOffset * (1f - mergeProgress),
+                    y = center.y
+                )
+            )
+        }
+
+        if (checkProgress > 0f) {
+            val stroke = 3.5.dp.toPx()
+            val a = Offset(center.x - 10.dp.toPx(), center.y)
+            val b = Offset(center.x - 2.dp.toPx(), center.y + 8.dp.toPx())
+            val c = Offset(center.x + 13.dp.toPx(), center.y - 9.dp.toPx())
+            val first = (checkProgress * 2f).coerceIn(0f, 1f)
+            val second = ((checkProgress - 0.5f) * 2f).coerceIn(0f, 1f)
             drawLine(
-                color = successColor,
-                start = b,
+                color = Color.White,
+                start = a,
                 end = Offset(
-                    b.x + (c.x - b.x) * second,
-                    b.y + (c.y - b.y) * second
+                    a.x + (b.x - a.x) * first,
+                    a.y + (b.y - a.y) * first
                 ),
                 strokeWidth = stroke,
                 cap = StrokeCap.Round
             )
+            if (second > 0f) {
+                drawLine(
+                    color = Color.White,
+                    start = b,
+                    end = Offset(
+                        b.x + (c.x - b.x) * second,
+                        b.y + (c.y - b.y) * second
+                    ),
+                    strokeWidth = stroke,
+                    cap = StrokeCap.Round
+                )
+            }
         }
     }
 }

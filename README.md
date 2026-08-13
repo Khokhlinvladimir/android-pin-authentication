@@ -8,7 +8,18 @@
 
 Library for user authentication using PIN code. This library provides convenient and secure ways to verify users' identities using a simple numeric PIN. It can be used by developers when creating applications that require an additional layer of security or user authentication.
 
-<img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_russian.gif" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_01.png" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_02.png" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_03.png" alt="" width="200px"></a>
+## Motion showcase
+
+<table>
+  <tr>
+    <td align="center"><strong>Create and confirm</strong><br><img src="screens/motion/pin-creation.gif" alt="Creating and confirming a PIN" width="240"></td>
+    <td align="center"><strong>Fast validation</strong><br><img src="screens/motion/pin-validation.gif" alt="Validating a PIN" width="240"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Error and recovery</strong><br><img src="screens/motion/pin-error-recovery.gif" alt="PIN error feedback and recovery" width="240"></td>
+    <td align="center"><strong>Confirmed reset</strong><br><img src="screens/motion/pin-reset-dialog.gif" alt="Forgotten PIN confirmation dialog" width="240"></td>
+  </tr>
+</table>
 
 ## Main features
 
@@ -30,7 +41,7 @@ Installing a PIN authentication library is the first step to securely protecting
 
 ```gradle
 dependencies {
-    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v1.0.6'
+    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha02'
 }
 ```
 With this simple step, you will enable a powerful authentication tool in your application, making it reliable and secure.

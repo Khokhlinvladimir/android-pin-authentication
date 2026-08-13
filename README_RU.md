@@ -41,7 +41,7 @@
 
 ```gradle
 dependencies {
-   implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha02'
+   implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha03'
 }
 ```
 С этим простым шагом, вы включите мощный инструмент аутентификации в вашем приложении, делая его надежным и безопасным.
@@ -149,7 +149,7 @@ Surface(
 
 Это основные шаги по использованию библиотеки для аутентификации по PIN-коду в вашем Android-приложении. Настраивайте библиотеку и обрабатывайте события в соответствии с вашими потребностями для создания безопасного и удобного опыта для пользователей.
 
-## Экспериментальный API контроллера (2.0.0-alpha02)
+## API контроллера и кастомизации (2.0.0-alpha03)
 
 Новый API работает через неизменяемый `StateFlow`, не зависит от глобального `PinCodeStateManager` и поддерживает настраиваемую motion-систему.
 
@@ -167,6 +167,39 @@ PinAuthScreen(
 `PinAuthMotionSpec.Premium` включает пружинный ввод PIN, анимацию удаления, shake при ошибке, пульсацию во время проверки, success-состояние, анимации клавиатуры, haptic feedback и фоновое свечение. Для полностью статичного интерфейса используйте `PinAuthMotionSpec.None`.
 
 При включённой биометрии и зарегистрированном отпечатке controller API показывает кнопку биометрической проверки в сценарии валидации. Сброс через «Забыли PIN-код?» отправляется приложению только после подтверждения диалога.
+
+### Кастомизация цифр и маски PIN
+
+`PinAuthCustomization` позволяет менять размеры, цвета, форму и типографику клавиш, а также внешний вид маски без копирования компонентов библиотеки:
+
+```kotlin
+val customization = PinAuthCustomization(
+    keypadStyle = PinKeypadStyle(
+        keySize = 64.dp,
+        keyShape = RoundedCornerShape(18.dp),
+        containerColor = Color(0xFF171A24),
+        contentColor = Color.White,
+        digitTextStyle = MaterialTheme.typography.headlineMedium
+    ),
+    maskStyle = PinMaskStyle(
+        dotSize = 30.dp,
+        dotRadius = 8.dp,
+        filledColor = Color(0xFF7C5CFC),
+        successColor = Color(0xFF18A566)
+    )
+)
+
+PinAuthScreen(
+    controller = controller,
+    scenario = PinAuthScenario.VALIDATION,
+    customization = customization,
+    onResult = ::handleResult
+)
+```
+
+В legacy API тот же объект передаётся как `PinCodeScreen(customization)`.
+
+Для полностью собственного оформления передайте composable-слоты `digitContent` и `maskContent`. Обработка нажатий, состояния блокировки, haptic feedback, accessibility, controller API и безопасность PIN остаются внутри библиотеки. Маска получает только количество введённых цифр и состояние обратной связи; сами значения PIN ей не передаются.
 
 ## Безопасность и миграция
 

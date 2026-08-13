@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.android.pinlibrary.R
+import com.android.pinlibrary.ui.customization.PinAuthCustomization
 import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
-import com.android.pinlibrary.ui.systemdesign.theme.Dimens
 import com.android.pinlibrary.utils.enums.PinCodeScenario
 import com.android.pinlibrary.utils.keyboard.KeyboardButtonEnum
 import com.android.pinlibrary.utils.preferences.SettingsManager
@@ -40,6 +40,21 @@ fun Keyboard(
     enabled: Boolean,
     motionSpec: PinAuthMotionSpec,
     onButtonClick: (KeyboardButtonEnum) -> Unit
+) = Keyboard(
+    pinCodeScenario = pinCodeScenario,
+    enabled = enabled,
+    motionSpec = motionSpec,
+    customization = PinAuthCustomization.Default,
+    onButtonClick = onButtonClick
+)
+
+@Composable
+fun Keyboard(
+    pinCodeScenario: PinCodeScenario,
+    enabled: Boolean,
+    motionSpec: PinAuthMotionSpec,
+    customization: PinAuthCustomization,
+    onButtonClick: (KeyboardButtonEnum) -> Unit
 ) {
 
     val rowModifier = Modifier.wrapContentSize()
@@ -48,8 +63,8 @@ fun Keyboard(
         modifier = Modifier
             .wrapContentSize()
             .padding(
-                vertical = Dimens.verticalKeyboardPadding,
-                horizontal = Dimens.horizontalKeyboardPadding
+                vertical = customization.keypadStyle.verticalContentPadding,
+                horizontal = customization.keypadStyle.horizontalContentPadding
             ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -62,6 +77,8 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_1,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
             NumberButton(
@@ -69,6 +86,8 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_2,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
             NumberButton(
@@ -76,6 +95,8 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_3,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
         }
@@ -87,6 +108,8 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_4,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
             NumberButton(
@@ -94,6 +117,8 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_5,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
             NumberButton(
@@ -101,6 +126,8 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_6,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
         }
@@ -112,6 +139,8 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_7,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
             NumberButton(
@@ -119,6 +148,8 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_8,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
             NumberButton(
@@ -126,6 +157,8 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_9,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
         }
@@ -143,16 +176,22 @@ fun Keyboard(
                     KeyboardButtonEnum.BUTTON_FINGERPRINT,
                     enabled,
                     motionSpec,
+                    customization.keypadStyle,
                     onButtonClick
                 )
             } else {
-                ImageButtonStub(R.drawable.ic_fingerprint_transparent_30)
+                ImageButtonStub(
+                    resourceId = R.drawable.ic_fingerprint_transparent_30,
+                    style = customization.keypadStyle
+                )
             }
             NumberButton(
                 stringResource(id = R.string.button0_large_text),
                 KeyboardButtonEnum.BUTTON_0,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
+                customization.digitContent,
                 onButtonClick
             )
             ImageButton(
@@ -160,6 +199,7 @@ fun Keyboard(
                 KeyboardButtonEnum.BUTTON_CLEAR,
                 enabled,
                 motionSpec,
+                customization.keypadStyle,
                 onButtonClick
             )
         }

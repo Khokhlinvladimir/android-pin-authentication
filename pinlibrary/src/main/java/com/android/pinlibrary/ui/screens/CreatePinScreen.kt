@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.android.pinlibrary.R
 import com.android.pinlibrary.ui.components.PinCodeContent
+import com.android.pinlibrary.ui.customization.PinAuthCustomization
 import com.android.pinlibrary.utils.preferences.AttemptCounter
 import com.android.pinlibrary.utils.preferences.PinCodeManager
 import com.android.pinlibrary.utils.state.PinCodeStateManager
@@ -23,7 +24,8 @@ import kotlinx.coroutines.withContext
 @Composable
 fun CreatePinScreen(
     viewModel: PinViewModel,
-    pinCodeStateManager: PinCodeStateManager
+    pinCodeStateManager: PinCodeStateManager,
+    customization: PinAuthCustomization = PinAuthCustomization.Default
 ) {
     val context = LocalContext.current
     val pinCodeManager = remember(context) { PinCodeManager(context) }
@@ -43,7 +45,8 @@ fun CreatePinScreen(
         headerId = headerId,
         notification = notification,
         forgotMessageId = R.string.pin_code_forgot_text,
-        enabled = !isProcessing && !isCompleted
+        enabled = !isProcessing && !isCompleted,
+        customization = customization
     ) { pinValue ->
         if (isProcessing || isCompleted) return@PinCodeContent
         val pinCode = pinValue.joinToString("")

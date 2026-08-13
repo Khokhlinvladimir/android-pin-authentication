@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0-alpha03
+
+- Add `PinAuthCustomization`, `PinKeypadStyle`, and `PinMaskStyle` for reusable visual configuration.
+- Add composable slots for fully custom digit content and PIN masking without replacing input logic.
+- Support the same customization object in both controller and legacy Compose APIs.
+- Keep entered PIN values private: custom masks receive counts and feedback state only.
+
 ## 2.0.0-alpha02
 
 - Add a configurable premium motion system through `PinAuthMotionSpec`.

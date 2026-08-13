@@ -33,6 +33,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.unit.dp
+import com.android.pinlibrary.ui.customization.PinMaskContent
+import com.android.pinlibrary.ui.customization.PinMaskState
+import com.android.pinlibrary.ui.customization.PinMaskStyle
 import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
 
 enum class PinIndicatorFeedback {
@@ -63,6 +66,31 @@ fun RoundedBoxesRow(
     isProcessing: Boolean,
     motionSpec: PinAuthMotionSpec,
     modifier: Modifier = Modifier
+) = RoundedBoxesRow(
+    startQuantity = startQuantity,
+    quantity = quantity,
+    feedback = feedback,
+    feedbackToken = feedbackToken,
+    isProcessing = isProcessing,
+    motionSpec = motionSpec,
+    style = PinMaskStyle(),
+    maskContent = { state, style, motion ->
+        DefaultPinMask(state = state, style = style, motionSpec = motion)
+    },
+    modifier = modifier
+)
+
+@Composable
+fun RoundedBoxesRow(
+    startQuantity: Int,
+    quantity: Int,
+    feedback: PinIndicatorFeedback,
+    feedbackToken: Any?,
+    isProcessing: Boolean,
+    motionSpec: PinAuthMotionSpec,
+    style: PinMaskStyle,
+    maskContent: PinMaskContent,
+    modifier: Modifier = Modifier
 ) {
     val shake = remember { Animatable(0f) }
     LaunchedEffect(feedback, feedbackToken, motionSpec.enabled) {
@@ -86,25 +114,45 @@ fun RoundedBoxesRow(
 
     Box(
         modifier = modifier
-            .height(72.dp)
-            .widthIn(min = 96.dp)
+            .height(style.indicatorHeight)
+            .widthIn(min = style.minimumWidth)
             .graphicsLayer { translationX = shake.value.dp.toPx() },
         contentAlignment = Alignment.Center
     ) {
-        if (feedback == PinIndicatorFeedback.SUCCESS) {
-            MergingSuccessIndicator(
-                count = startQuantity,
-                motionSpec = motionSpec
-            )
-        } else {
-            PinDots(
-                count = startQuantity,
-                filledCount = quantity,
+        maskContent(
+            PinMaskState(
+                totalDigits = startQuantity,
+                enteredDigits = quantity,
                 feedback = feedback,
-                isProcessing = isProcessing,
-                motionSpec = motionSpec
-            )
-        }
+                isProcessing = isProcessing
+            ),
+            style,
+            motionSpec
+        )
+    }
+}
+
+@Composable
+fun DefaultPinMask(
+    state: PinMaskState,
+    style: PinMaskStyle = PinMaskStyle(),
+    motionSpec: PinAuthMotionSpec = PinAuthMotionSpec.Premium
+) {
+    if (state.feedback == PinIndicatorFeedback.SUCCESS) {
+        MergingSuccessIndicator(
+            count = state.totalDigits,
+            motionSpec = motionSpec,
+            style = style
+        )
+    } else {
+        PinDots(
+            count = state.totalDigits,
+            filledCount = state.enteredDigits,
+            feedback = state.feedback,
+            isProcessing = state.isProcessing,
+            motionSpec = motionSpec,
+            style = style
+        )
     }
 }
 
@@ -114,7 +162,8 @@ private fun PinDots(
     filledCount: Int,
     feedback: PinIndicatorFeedback,
     isProcessing: Boolean,
-    motionSpec: PinAuthMotionSpec
+    motionSpec: PinAuthMotionSpec,
+    style: PinMaskStyle
 ) {
     val pulse = if (motionSpec.enabled && isProcessing) {
         val transition = rememberInfiniteTransition(label = "pin-processing")
@@ -131,9 +180,11 @@ private fun PinDots(
     } else {
         1f
     }
-    val primary = MaterialTheme.colorScheme.primary
-    val error = MaterialTheme.colorScheme.error
-    val outline = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.42f)
+    val primary = style.filledColor.resolved(MaterialTheme.colorScheme.primary)
+    val error = style.errorColor.resolved(MaterialTheme.colorScheme.error)
+    val outline = style.emptyColor.resolved(
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.42f)
+    )
 
     Row(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 18.dp),
@@ -149,7 +200,8 @@ private fun PinDots(
                 outline = outline,
                 pulse = pulse,
                 motionSpec = motionSpec,
-                modifier = Modifier.padding(horizontal = 5.dp)
+                style = style,
+                modifier = Modifier.padding(horizontal = style.dotSpacing)
             )
         }
     }
@@ -162,6 +214,7 @@ private fun PinDot(
     outline: Color,
     pulse: Float,
     motionSpec: PinAuthMotionSpec,
+    style: PinMaskStyle,
     modifier: Modifier = Modifier
 ) {
     val scale by animateFloatAsState(
@@ -181,14 +234,14 @@ private fun PinDot(
 
     Canvas(
         modifier = modifier
-            .size(26.dp)
+            .size(style.dotSize)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
                 alpha = pulse
             }
     ) {
-        val radius = size.minDimension / 2f - 2.dp.toPx()
+        val radius = style.dotRadius.toPx()
         drawCircle(
             color = if (fillProgress > 0f) color.copy(alpha = fillProgress) else Color.Transparent,
             radius = radius * (0.78f + 0.22f * fillProgress)
@@ -196,7 +249,7 @@ private fun PinDot(
         drawCircle(
             color = if (fillProgress > 0f) color else outline,
             radius = radius,
-            style = Stroke(width = 1.6.dp.toPx())
+            style = Stroke(width = style.outlineWidth.toPx())
         )
     }
 }
@@ -204,15 +257,17 @@ private fun PinDot(
 @Composable
 private fun MergingSuccessIndicator(
     count: Int,
-    motionSpec: PinAuthMotionSpec
+    motionSpec: PinAuthMotionSpec,
+    style: PinMaskStyle
 ) {
     val progress = remember { Animatable(if (motionSpec.enabled) 0f else 1f) }
-    val initialColor = MaterialTheme.colorScheme.primary
-    val successColor = if (isSystemInDarkTheme()) {
+    val initialColor = style.filledColor.resolved(MaterialTheme.colorScheme.primary)
+    val themedSuccessColor = if (isSystemInDarkTheme()) {
         Color(0xFF63E69A)
     } else {
         Color(0xFF168A4A)
     }
+    val successColor = style.successColor.resolved(themedSuccessColor)
     LaunchedEffect(motionSpec.enabled) {
         if (motionSpec.enabled) {
             progress.snapTo(0f)
@@ -228,15 +283,18 @@ private fun MergingSuccessIndicator(
 
     Canvas(
         modifier = Modifier
-            .size(width = (count * 36).dp, height = 58.dp)
+            .size(
+                width = maxOf(style.minimumWidth, style.dotSize * count + style.dotSpacing * count * 2),
+                height = style.successSize + 8.dp
+            )
     ) {
         val mergeProgress = (progress.value / 0.78f).coerceIn(0f, 1f)
         val colorProgress = ((progress.value - 0.18f) / 0.66f).coerceIn(0f, 1f)
         val checkProgress = ((progress.value - 0.76f) / 0.24f).coerceIn(0f, 1f)
-        val dotRadius = 11.dp.toPx()
-        val finalRadius = 25.dp.toPx()
+        val dotRadius = style.dotRadius.toPx()
+        val finalRadius = style.successSize.toPx() / 2f
         val radius = dotRadius + (finalRadius - dotRadius) * mergeProgress
-        val spacing = 36.dp.toPx()
+        val spacing = (style.dotSize + style.dotSpacing * 2).toPx()
         val center = this.center
         val mergedColor = lerp(initialColor, successColor, colorProgress)
 
@@ -253,14 +311,15 @@ private fun MergingSuccessIndicator(
         }
 
         if (checkProgress > 0f) {
-            val stroke = 3.5.dp.toPx()
-            val a = Offset(center.x - 10.dp.toPx(), center.y)
-            val b = Offset(center.x - 2.dp.toPx(), center.y + 8.dp.toPx())
-            val c = Offset(center.x + 13.dp.toPx(), center.y - 9.dp.toPx())
+            val stroke = style.successStrokeWidth.toPx()
+            val scale = style.successSize.toPx() / 50.dp.toPx()
+            val a = Offset(center.x - 10.dp.toPx() * scale, center.y)
+            val b = Offset(center.x - 2.dp.toPx() * scale, center.y + 8.dp.toPx() * scale)
+            val c = Offset(center.x + 13.dp.toPx() * scale, center.y - 9.dp.toPx() * scale)
             val first = (checkProgress * 2f).coerceIn(0f, 1f)
             val second = ((checkProgress - 0.5f) * 2f).coerceIn(0f, 1f)
             drawLine(
-                color = Color.White,
+                color = style.successContentColor,
                 start = a,
                 end = Offset(
                     a.x + (b.x - a.x) * first,
@@ -271,7 +330,7 @@ private fun MergingSuccessIndicator(
             )
             if (second > 0f) {
                 drawLine(
-                    color = Color.White,
+                    color = style.successContentColor,
                     start = b,
                     end = Offset(
                         b.x + (c.x - b.x) * second,
@@ -284,6 +343,9 @@ private fun MergingSuccessIndicator(
         }
     }
 }
+
+private fun Color.resolved(defaultColor: Color): Color =
+    if (this == Color.Unspecified) defaultColor else this
 
 @Composable
 fun RoundedBox(isFilled: Boolean) {

@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import com.android.pinlibrary.ui.systemdesign.indicator.RoundedBoxesRow
 import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
 import com.android.pinlibrary.ui.systemdesign.indicator.PinIndicatorFeedback
+import com.android.pinlibrary.ui.customization.PinAuthCustomization
 import com.android.pinlibrary.utils.biometric.BiometricScannerScreen
 import com.android.pinlibrary.utils.enums.PinCodeScenario
 import com.android.pinlibrary.utils.helpers.fillArrayWithButtons
@@ -69,6 +70,29 @@ fun PinCodeContent(
     pinCodeScenario: PinCodeScenario = PinCodeScenario.STUB,
     authenticationCallback: BiometricPrompt.AuthenticationCallback? = null,
     enabled: Boolean,
+    onClick: (buttonArray: SnapshotStateList<Int>) -> Unit
+) = PinCodeContent(
+    headerId = headerId,
+    notification = notification,
+    forgotMessageId = forgotMessageId,
+    pinCodeStateManager = pinCodeStateManager,
+    pinCodeScenario = pinCodeScenario,
+    authenticationCallback = authenticationCallback,
+    enabled = enabled,
+    customization = PinAuthCustomization.Default,
+    onClick = onClick
+)
+
+@Composable
+fun PinCodeContent(
+    headerId: Int,
+    notification: String,
+    forgotMessageId: Int,
+    pinCodeStateManager: PinCodeStateManager? = null,
+    pinCodeScenario: PinCodeScenario = PinCodeScenario.STUB,
+    authenticationCallback: BiometricPrompt.AuthenticationCallback? = null,
+    enabled: Boolean,
+    customization: PinAuthCustomization,
     onClick: (buttonArray: SnapshotStateList<Int>) -> Unit
 ) {
     val settingsManager = SettingsManager(context = LocalContext.current)
@@ -159,11 +183,15 @@ fun PinCodeContent(
             },
             feedbackToken = notification,
             isProcessing = !enabled && notification.isEmpty(),
-            motionSpec = PinAuthMotionSpec.Premium
+            motionSpec = PinAuthMotionSpec.Premium,
+            style = customization.maskStyle,
+            maskContent = customization.maskContent
         )
         Keyboard(
             pinCodeScenario = pinCodeScenario,
             enabled = enabled,
+            motionSpec = PinAuthMotionSpec.Premium,
+            customization = customization,
             onButtonClick = onKeyboardButtonClick
         )
         pinCodeStateManager?.let {

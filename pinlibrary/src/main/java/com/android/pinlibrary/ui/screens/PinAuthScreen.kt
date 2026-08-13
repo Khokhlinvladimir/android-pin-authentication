@@ -66,6 +66,7 @@ import com.android.pinlibrary.api.PinAuthUiState
 import com.android.pinlibrary.ui.components.Keyboard
 import com.android.pinlibrary.ui.components.PinCodeScreenHeader
 import com.android.pinlibrary.ui.components.PinCodeScreenNotification
+import com.android.pinlibrary.ui.customization.PinAuthCustomization
 import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
 import com.android.pinlibrary.ui.systemdesign.indicator.PinIndicatorFeedback
 import com.android.pinlibrary.ui.systemdesign.indicator.RoundedBoxesRow
@@ -99,6 +100,24 @@ fun PinAuthScreen(
     scenario: PinAuthScenario,
     onResult: (PinAuthResult) -> Unit,
     motionSpec: PinAuthMotionSpec,
+    modifier: Modifier = Modifier
+) = PinAuthScreen(
+    controller = controller,
+    scenario = scenario,
+    onResult = onResult,
+    motionSpec = motionSpec,
+    customization = PinAuthCustomization.Default,
+    modifier = modifier
+)
+
+/** State-driven entry point with custom keypad and PIN mask rendering. */
+@Composable
+fun PinAuthScreen(
+    controller: PinAuthController,
+    scenario: PinAuthScenario,
+    onResult: (PinAuthResult) -> Unit,
+    motionSpec: PinAuthMotionSpec = PinAuthMotionSpec.Premium,
+    customization: PinAuthCustomization,
     modifier: Modifier = Modifier
 ) {
     val state by controller.state.collectAsState()
@@ -164,6 +183,7 @@ fun PinAuthScreen(
             }
         },
         motionSpec = motionSpec,
+        customization = customization,
         modifier = modifier
     )
 }
@@ -187,6 +207,22 @@ fun PinAuthContent(
     state: PinAuthUiState,
     onAction: (PinAuthAction) -> Unit,
     motionSpec: PinAuthMotionSpec,
+    modifier: Modifier = Modifier
+) = PinAuthContent(
+    state = state,
+    onAction = onAction,
+    motionSpec = motionSpec,
+    customization = PinAuthCustomization.Default,
+    modifier = modifier
+)
+
+/** Stateless UI surface with customizable digit and PIN mask visuals. */
+@Composable
+fun PinAuthContent(
+    state: PinAuthUiState,
+    onAction: (PinAuthAction) -> Unit,
+    motionSpec: PinAuthMotionSpec = PinAuthMotionSpec.Premium,
+    customization: PinAuthCustomization,
     modifier: Modifier = Modifier
 ) {
     val view = LocalView.current
@@ -282,7 +318,9 @@ fun PinAuthContent(
                 feedback = feedback,
                 feedbackToken = state.message to state.remainingAttempts,
                 isProcessing = state.isProcessing,
-                motionSpec = motionSpec
+                motionSpec = motionSpec,
+                style = customization.maskStyle,
+                maskContent = customization.maskContent
             )
 
             Box(
@@ -296,6 +334,7 @@ fun PinAuthContent(
                     pinCodeScenario = state.scenario.toLegacyScenario(),
                     enabled = state.isInputEnabled,
                     motionSpec = motionSpec,
+                    customization = customization,
                     onButtonClick = { button ->
                         when (button) {
                             KeyboardButtonEnum.BUTTON_CLEAR -> onAction(PinAuthAction.Backspace)

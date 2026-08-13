@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,9 +25,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
+import com.android.pinlibrary.ui.customization.PinDigitContent
+import com.android.pinlibrary.ui.customization.PinKeypadStyle
 import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
-import com.android.pinlibrary.ui.systemdesign.theme.Dimens
 import com.android.pinlibrary.utils.keyboard.KeyboardButtonEnum
 import com.android.pinlibrary.utils.listeners.NumberListener
 
@@ -59,19 +58,39 @@ fun NumberButton(
     enabled: Boolean,
     motionSpec: PinAuthMotionSpec,
     onButtonClick: (KeyboardButtonEnum) -> Unit
+) = NumberButton(
+    number = number,
+    keyboardEnum = keyboardEnum,
+    enabled = enabled,
+    motionSpec = motionSpec,
+    style = PinKeypadStyle(),
+    digitContent = { digit, _, style ->
+        Text(
+            text = digit.toString(),
+            style = style.digitTextStyle,
+            color = style.resolvedContentColor()
+        )
+    },
+    onButtonClick = onButtonClick
+)
+
+@Composable
+fun NumberButton(
+    number: String,
+    keyboardEnum: KeyboardButtonEnum,
+    enabled: Boolean,
+    motionSpec: PinAuthMotionSpec,
+    style: PinKeypadStyle,
+    digitContent: PinDigitContent,
+    onButtonClick: (KeyboardButtonEnum) -> Unit
 ) {
     AnimatedKeySurface(
         enabled = enabled,
         motionSpec = motionSpec,
+        style = style,
         onClick = { onButtonClick(keyboardEnum) }
     ) {
-        Text(
-            text = number,
-            style = TextStyle(
-                fontSize = Dimens.keyBoardButtonFontSize,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        )
+        digitContent(number.toInt(), enabled, style)
     }
 }
 
@@ -102,11 +121,29 @@ fun ImageButton(
     enabled: Boolean,
     motionSpec: PinAuthMotionSpec,
     onButtonClick: (KeyboardButtonEnum) -> Unit
+) = ImageButton(
+    resourceId = resourceId,
+    keyboardEnum = keyboardEnum,
+    enabled = enabled,
+    motionSpec = motionSpec,
+    style = PinKeypadStyle(),
+    onButtonClick = onButtonClick
+)
+
+@Composable
+fun ImageButton(
+    resourceId: Int,
+    keyboardEnum: KeyboardButtonEnum,
+    enabled: Boolean,
+    motionSpec: PinAuthMotionSpec,
+    style: PinKeypadStyle,
+    onButtonClick: (KeyboardButtonEnum) -> Unit
 ) {
     val painter = painterResource(id = resourceId)
     AnimatedKeySurface(
         enabled = enabled,
         motionSpec = motionSpec,
+        style = style,
         onClick = { onButtonClick(keyboardEnum) }
     ) {
         Image(
@@ -123,6 +160,7 @@ fun ImageButton(
 private fun AnimatedKeySurface(
     enabled: Boolean,
     motionSpec: PinAuthMotionSpec,
+    style: PinKeypadStyle,
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -138,34 +176,38 @@ private fun AnimatedKeySurface(
         label = "pin-key-scale"
     )
     val view = LocalView.current
-    val surfaceColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-        alpha = if (isPressed) 0.72f else 0.34f
-    )
+    val surfaceColor = if (isPressed) {
+        style.pressedContainerColor.takeUnless { it == androidx.compose.ui.graphics.Color.Unspecified }
+            ?: MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.72f)
+    } else {
+        style.containerColor.takeUnless { it == androidx.compose.ui.graphics.Color.Unspecified }
+            ?: MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.34f)
+    }
 
     Box(
         modifier = Modifier
             .wrapContentSize()
             .padding(
-                vertical = Dimens.verticalKeyboardButtonPadding,
-                horizontal = Dimens.horizontalKeyboardButtonPadding
+                vertical = style.verticalKeySpacing,
+                horizontal = style.horizontalKeySpacing
             )
     ) {
         Box(
             modifier = Modifier
-                .size(Dimens.keyBoardButtonSize)
+                .size(style.keySize)
                 .graphicsLayer {
                     scaleX = scale
                     scaleY = scale
-                    alpha = if (enabled) 1f else 0.5f
+                    alpha = if (enabled) 1f else style.disabledAlpha
                 }
-                .clip(CircleShape)
+                .clip(style.keyShape)
                 .background(surfaceColor)
                 .clickable(
                     enabled = enabled,
                     interactionSource = interactionSource,
                     indication = rememberRipple(
                         bounded = true,
-                        radius = Dimens.keyBoardButtonSize / 2
+                        radius = style.keySize / 2
                     )
                 ) {
                     if (motionSpec.hapticsEnabled) {
@@ -181,20 +223,33 @@ private fun AnimatedKeySurface(
 }
 
 @Composable
+private fun PinKeypadStyle.resolvedContentColor() =
+    if (contentColor == androidx.compose.ui.graphics.Color.Unspecified) {
+        MaterialTheme.colorScheme.onSurface
+    } else {
+        contentColor
+    }
+
+@Composable
 fun ImageButtonStub(resourceId: Int) {
+    ImageButtonStub(resourceId = resourceId, style = PinKeypadStyle())
+}
+
+@Composable
+fun ImageButtonStub(resourceId: Int, style: PinKeypadStyle) {
     val painter = painterResource(id = resourceId)
     Box(
         modifier = Modifier
             .wrapContentSize()
             .padding(
-                vertical = Dimens.verticalKeyboardButtonPadding,
-                horizontal = Dimens.horizontalKeyboardButtonPadding
+                vertical = style.verticalKeySpacing,
+                horizontal = style.horizontalKeySpacing
             )
     ) {
         Box(
             modifier = Modifier
-                .size(Dimens.keyBoardButtonSize)
-                .clip(CircleShape),
+                .size(style.keySize)
+                .clip(style.keyShape),
             contentAlignment = Alignment.Center
         ) {
             Image(painter = painter, contentDescription = null)

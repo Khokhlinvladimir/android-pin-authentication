@@ -41,7 +41,7 @@ Installing a PIN authentication library is the first step to securely protecting
 
 ```gradle
 dependencies {
-    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha02'
+    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha03'
 }
 ```
 With this simple step, you will enable a powerful authentication tool in your application, making it reliable and secure.
@@ -149,7 +149,7 @@ Surface(
 
 These are the basic steps to use the library for PIN authentication in your Android application. Customize the library and handle events according to your needs to create a secure and seamless user experience.
 
-## Experimental controller API (2.0.0-alpha02)
+## Controller and customization API (2.0.0-alpha03)
 
 The new API is state-driven, does not depend on the process-global `PinCodeStateManager`, and can be tested with custom stores. The legacy API above remains available during migration.
 
@@ -182,6 +182,39 @@ PinAuthScreen(
 ```
 
 `PinAuthController.state` exposes immutable `StateFlow<PinAuthUiState>`. Terminal events are delivered through `results`, while `dispatch` accepts typed digit, backspace, biometric, and reset actions. `PinAuthMotionSpec.Premium` enables animated dots, step transitions, error shake, processing pulse, success feedback, keypad press motion, haptics, and the ambient background. Use `PinAuthMotionSpec.None` for a fully static surface, or copy `Premium` to customize individual timings and effects. When enabled and enrolled on the device, biometrics are available during PIN validation. Forgotten-PIN recovery is emitted only after the user confirms the dialog.
+
+### Custom digits and PIN mask
+
+`PinAuthCustomization` changes keypad dimensions, colors, shape, typography, and mask appearance without copying library components:
+
+```kotlin
+val customization = PinAuthCustomization(
+    keypadStyle = PinKeypadStyle(
+        keySize = 64.dp,
+        keyShape = RoundedCornerShape(18.dp),
+        containerColor = Color(0xFF171A24),
+        contentColor = Color.White,
+        digitTextStyle = MaterialTheme.typography.headlineMedium
+    ),
+    maskStyle = PinMaskStyle(
+        dotSize = 30.dp,
+        dotRadius = 8.dp,
+        filledColor = Color(0xFF7C5CFC),
+        successColor = Color(0xFF18A566)
+    )
+)
+
+PinAuthScreen(
+    controller = controller,
+    scenario = PinAuthScenario.VALIDATION,
+    customization = customization,
+    onResult = ::handleResult
+)
+```
+
+The legacy API accepts the same object as `PinCodeScreen(customization)`.
+
+For a completely custom visual, provide `digitContent` and `maskContent` composable slots. The library still owns clicks, enabled state, haptics, accessibility, controller wiring, and PIN security. The mask receives counts and feedback state only; entered PIN values are never exposed.
 
 ## Security and migration notes
 

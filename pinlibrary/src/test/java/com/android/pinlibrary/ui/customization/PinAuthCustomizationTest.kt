@@ -2,6 +2,8 @@ package com.android.pinlibrary.ui.customization
 
 import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PinAuthCustomizationTest {
@@ -15,6 +17,12 @@ class PinAuthCustomizationTest {
 
         assertEquals(64.dp, customization.keypadStyle.keySize)
         assertEquals(32.dp, customization.maskStyle.dotSize)
+    }
+
+    @Test
+    fun successCheckIsEnabledByDefaultAndCanBeDisabled() {
+        assertTrue(PinMaskStyle().showSuccessCheck)
+        assertFalse(PinMaskStyle(showSuccessCheck = false).showSuccessCheck)
     }
 
     @Test(expected = IllegalArgumentException::class)

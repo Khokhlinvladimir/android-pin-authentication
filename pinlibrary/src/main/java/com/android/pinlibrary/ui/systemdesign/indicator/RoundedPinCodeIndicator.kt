@@ -310,7 +310,7 @@ private fun MergingSuccessIndicator(
             )
         }
 
-        if (checkProgress > 0f) {
+        if (style.showSuccessCheck && checkProgress > 0f) {
             val stroke = style.successStrokeWidth.toPx()
             val scale = style.successSize.toPx() / 50.dp.toPx()
             val a = Offset(center.x - 10.dp.toPx() * scale, center.y)

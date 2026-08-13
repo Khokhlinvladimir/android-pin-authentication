@@ -41,7 +41,7 @@
 
 ```gradle
 dependencies {
-   implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha03'
+   implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha04'
 }
 ```
 С этим простым шагом, вы включите мощный инструмент аутентификации в вашем приложении, делая его надежным и безопасным.
@@ -149,7 +149,7 @@ Surface(
 
 Это основные шаги по использованию библиотеки для аутентификации по PIN-коду в вашем Android-приложении. Настраивайте библиотеку и обрабатывайте события в соответствии с вашими потребностями для создания безопасного и удобного опыта для пользователей.
 
-## API контроллера и кастомизации (2.0.0-alpha03)
+## API контроллера и кастомизации (2.0.0-alpha04)
 
 Новый API работает через неизменяемый `StateFlow`, не зависит от глобального `PinCodeStateManager` и поддерживает настраиваемую motion-систему.
 
@@ -185,7 +185,8 @@ val customization = PinAuthCustomization(
         dotSize = 30.dp,
         dotRadius = 8.dp,
         filledColor = Color(0xFF7C5CFC),
-        successColor = Color(0xFF18A566)
+        successColor = Color(0xFF18A566),
+        showSuccessCheck = false
     )
 )
 
@@ -198,6 +199,8 @@ PinAuthScreen(
 ```
 
 В legacy API тот же объект передаётся как `PinCodeScreen(customization)`.
+
+По умолчанию `showSuccessCheck = true`. Установите `false`, чтобы сохранить объединение маски в зелёный круг, но не рисовать галочку.
 
 Для полностью собственного оформления передайте composable-слоты `digitContent` и `maskContent`. Обработка нажатий, состояния блокировки, haptic feedback, accessibility, controller API и безопасность PIN остаются внутри библиотеки. Маска получает только количество введённых цифр и состояние обратной связи; сами значения PIN ей не передаются.
 

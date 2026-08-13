@@ -41,7 +41,7 @@ Installing a PIN authentication library is the first step to securely protecting
 
 ```gradle
 dependencies {
-    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha03'
+    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha04'
 }
 ```
 With this simple step, you will enable a powerful authentication tool in your application, making it reliable and secure.
@@ -149,7 +149,7 @@ Surface(
 
 These are the basic steps to use the library for PIN authentication in your Android application. Customize the library and handle events according to your needs to create a secure and seamless user experience.
 
-## Controller and customization API (2.0.0-alpha03)
+## Controller and customization API (2.0.0-alpha04)
 
 The new API is state-driven, does not depend on the process-global `PinCodeStateManager`, and can be tested with custom stores. The legacy API above remains available during migration.
 
@@ -200,7 +200,8 @@ val customization = PinAuthCustomization(
         dotSize = 30.dp,
         dotRadius = 8.dp,
         filledColor = Color(0xFF7C5CFC),
-        successColor = Color(0xFF18A566)
+        successColor = Color(0xFF18A566),
+        showSuccessCheck = false
     )
 )
 
@@ -213,6 +214,8 @@ PinAuthScreen(
 ```
 
 The legacy API accepts the same object as `PinCodeScreen(customization)`.
+
+`showSuccessCheck` is `true` by default. Set it to `false` to keep the merging green success circle without drawing the check mark.
 
 For a completely custom visual, provide `digitContent` and `maskContent` composable slots. The library still owns clicks, enabled state, haptics, accessibility, controller wiring, and PIN security. The mask receives counts and feedback state only; entered PIN values are never exposed.
 

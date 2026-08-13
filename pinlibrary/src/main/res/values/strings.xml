@@ -33,6 +33,10 @@
     <string name="pin_code_attempts">Неправильный PIN. Попыток осталось: %1$d</string>
     <string name="pin_codes_do_not_match">PIN-коды не совпадают</string>
     <string name="password_successfully_saved">Пароль успешно сохранен</string>
+    <string name="pin_code_success_created">PIN-код создан</string>
+    <string name="pin_code_success_validated">Доступ разрешён</string>
+    <string name="pin_code_success_changed">PIN-код изменён</string>
+    <string name="pin_code_success_deleted">PIN-код удалён</string>
 
 
     <string name="authorization">Авторизация</string>

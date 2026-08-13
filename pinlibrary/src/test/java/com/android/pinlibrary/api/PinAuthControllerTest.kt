@@ -96,6 +96,24 @@ class PinAuthControllerTest {
         assertEquals(PinAuthStep.ENTER_PIN, controller.state.value.step)
     }
 
+    @Test
+    fun biometricAuthenticationCompletesOnlyValidation() = runBlocking {
+        val credentials = FakeCredentialStore("1234")
+        val attempts = FakeAttemptStore(3)
+        val controller = controller(credentials, attempts)
+
+        controller.start(PinAuthScenario.VALIDATION)
+        assertEquals(
+            PinAuthResult.Validated,
+            controller.dispatch(PinAuthAction.BiometricAuthenticated)
+        )
+        assertEquals(PinAuthStep.COMPLETED, controller.state.value.step)
+
+        controller.start(PinAuthScenario.CHANGE)
+        assertNull(controller.dispatch(PinAuthAction.BiometricAuthenticated))
+        assertEquals(PinAuthStep.ENTER_CURRENT_PIN, controller.state.value.step)
+    }
+
     private fun controller(
         credentials: FakeCredentialStore,
         attempts: FakeAttemptStore

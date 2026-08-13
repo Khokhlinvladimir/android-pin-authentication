@@ -8,7 +8,18 @@
 
 Библиотека для аутентификации пользователей с использованием PIN-кода. Эта библиотека предоставляет удобные и безопасные способы проверки личности пользователей с помощью простого числового PIN-кода. Она может быть использована разработчиками при создании приложений, требующих дополнительного слоя безопасности или идентификации пользователей.
 
-<img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_russian.gif" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_01.png" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_02.png" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_03.png" alt="" width="200px"></a>
+## Анимации и сценарии
+
+<table>
+  <tr>
+    <td align="center"><strong>Создание и подтверждение</strong><br><img src="screens/motion/pin-creation.gif" alt="Создание и подтверждение PIN-кода" width="240"></td>
+    <td align="center"><strong>Быстрая проверка</strong><br><img src="screens/motion/pin-validation.gif" alt="Проверка PIN-кода" width="240"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Ошибка и восстановление</strong><br><img src="screens/motion/pin-error-recovery.gif" alt="Анимация ошибки и повторный вход" width="240"></td>
+    <td align="center"><strong>Подтверждение сброса</strong><br><img src="screens/motion/pin-reset-dialog.gif" alt="Диалог восстановления PIN-кода" width="240"></td>
+  </tr>
+</table>
 
 ## Основные возможности
 
@@ -30,7 +41,7 @@
 
 ```gradle
 dependencies {
-   implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v1.0.6'
+   implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha02'
 }
 ```
 С этим простым шагом, вы включите мощный инструмент аутентификации в вашем приложении, делая его надежным и безопасным.
@@ -138,13 +149,32 @@ Surface(
 
 Это основные шаги по использованию библиотеки для аутентификации по PIN-коду в вашем Android-приложении. Настраивайте библиотеку и обрабатывайте события в соответствии с вашими потребностями для создания безопасного и удобного опыта для пользователей.
 
+## Экспериментальный API контроллера (2.0.0-alpha02)
+
+Новый API работает через неизменяемый `StateFlow`, не зависит от глобального `PinCodeStateManager` и поддерживает настраиваемую motion-систему.
+
+```kotlin
+PinAuthScreen(
+    controller = controller,
+    scenario = PinAuthScenario.VALIDATION,
+    motionSpec = PinAuthMotionSpec.Premium,
+    onResult = { result ->
+        if (result == PinAuthResult.Validated) openProtectedContent()
+    }
+)
+```
+
+`PinAuthMotionSpec.Premium` включает пружинный ввод PIN, анимацию удаления, shake при ошибке, пульсацию во время проверки, success-состояние, анимации клавиатуры, haptic feedback и фоновое свечение. Для полностью статичного интерфейса используйте `PinAuthMotionSpec.None`.
+
+При включённой биометрии и зарегистрированном отпечатке controller API показывает кнопку биометрической проверки в сценарии валидации. Сброс через «Забыли PIN-код?» отправляется приложению только после подтверждения диалога.
+
 ## Безопасность и миграция
 
-- Начиная с версии 1.0.6 библиотека хранит версионированный PBKDF2-verifier с индивидуальной случайной солью. Старые записи SHA-256 автоматически мигрируют после первого успешного ввода PIN.
+- Новые PIN хранятся как HMAC-verifier, защищённый неизвлекаемым ключом Android Keystore. Записи PBKDF2 и старые записи SHA-256 автоматически мигрируют после первой успешной проверки.
 - Проверка и сохранение PIN выполняются вне UI-потока Compose.
 - После исчерпания лимита попыток ввод остаётся заблокированным между перезапусками процесса. Приложение должно предоставить восстановление через `onResetPassword` и `clearConfiguration`.
 - Допустимая длина PIN — от 4 до 12 цифр, число попыток — от 1 до 100.
-- Локальный PIN является блокировкой приложения, а не заменой серверной аутентификации. Для чувствительных данных следует дополнительно использовать Android Keystore и исключать PIN-настройки из резервных копий.
+- Локальный PIN является блокировкой приложения, а не заменой серверной аутентификации. PIN-настройки следует исключать из резервных копий.
 
 ## Технические спецификации:
 

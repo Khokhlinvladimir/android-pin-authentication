@@ -88,6 +88,8 @@ class PinAuthController(
                 handleBackspace()
                 null
             }
+            PinAuthAction.RequestBiometric -> null
+            PinAuthAction.BiometricAuthenticated -> handleBiometricAuthenticated()
             PinAuthAction.RequestReset -> PinAuthResult.ResetRequested.also { publish(it) }
         }
     }
@@ -181,6 +183,18 @@ class PinAuthController(
             }
             else -> null
         }
+    }
+
+    private suspend fun handleBiometricAuthenticated(): PinAuthResult? {
+        val state = _state.value
+        if (!config.biometricEnabled ||
+            state.scenario != PinAuthScenario.VALIDATION ||
+            state.step != PinAuthStep.ENTER_CURRENT_PIN ||
+            state.isLocked
+        ) return null
+
+        attemptStore.reset()
+        return complete(PinAuthResult.Validated)
     }
 
     private fun beginPinChange(pin: CharArray): PinAuthResult? {

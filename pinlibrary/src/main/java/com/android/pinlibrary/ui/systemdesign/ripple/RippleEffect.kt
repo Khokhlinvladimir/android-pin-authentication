@@ -1,78 +1,58 @@
 package com.android.pinlibrary.ui.systemdesign.ripple
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import kotlin.math.max
 
+/** A reusable radial touch effect. New keyboard buttons use Material ripple directly. */
 @Composable
 fun RippleView(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    var isRippleAnimating by remember { mutableStateOf(false) }
-    var rippleSize by remember { mutableFloatStateOf(0f) }
-    var ripplePosition by remember { mutableStateOf(Offset(0f, 0f)) }
-
-    val rippleAlpha by animateFloatAsState(
-        targetValue = if (isRippleAnimating) 0f else 0.3f,
-        animationSpec = tween(durationMillis = 400), label = ""
-    )
+    val progress = remember { Animatable(1f) }
+    var ripplePosition by remember { mutableStateOf(Offset.Zero) }
+    val scope = rememberCoroutineScope()
+    val rippleColor = MaterialTheme.colorScheme.onSurface
 
     Box(
-        modifier = modifier
-            .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                    isRippleAnimating = true
-                    rippleSize = 2f * max(size.width, size.height)
-                    ripplePosition = offset
+        modifier = modifier.pointerInput(Unit) {
+            detectTapGestures { offset ->
+                ripplePosition = offset
+                scope.launch {
+                    progress.snapTo(0f)
+                    progress.animateTo(1f, tween(360))
                 }
             }
+        }
     ) {
-
-        /** Nested content goes here **/
         content()
-
-        if (isRippleAnimating) {
-            Box(
-                modifier = Modifier
-                    .size(rippleSize.dp)
-                    .offset {
-                        IntOffset(
-                            (ripplePosition.x - rippleSize / 2).toInt(),
-                            (ripplePosition.y - rippleSize / 2).toInt()
-                        )
-                    }
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                Color.Black.copy(alpha = rippleAlpha),
-                                Color.Transparent
-                            ),
-                            radius = (rippleSize / 2),
-                            center = Offset((rippleSize / 2), (rippleSize / 2))
-                        ),
-                        shape = RoundedCornerShape(percent = 50)
-                    )
-            )
+        if (progress.value < 1f) {
+            Canvas(modifier = Modifier.matchParentSize()) {
+                val maxRadius = max(
+                    max(ripplePosition.x, size.width - ripplePosition.x),
+                    max(ripplePosition.y, size.height - ripplePosition.y)
+                ) * 1.1f
+                drawCircle(
+                    color = rippleColor.copy(alpha = 0.22f * (1f - progress.value)),
+                    radius = maxRadius * progress.value,
+                    center = ripplePosition
+                )
+            }
         }
     }
 }

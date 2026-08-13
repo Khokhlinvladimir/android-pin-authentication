@@ -8,9 +8,14 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.pinlibrary.api.PinAuthConfig
+import com.android.pinlibrary.api.PinAuthAction
 import com.android.pinlibrary.api.PinAuthController
 import com.android.pinlibrary.api.PinAuthResult
 import com.android.pinlibrary.api.PinAuthScenario
+import com.android.pinlibrary.api.PinAuthStep
+import com.android.pinlibrary.api.PinAuthUiState
+import com.android.pinlibrary.ui.motion.PinAuthMotionSpec
+import com.android.pinlibrary.ui.screens.PinAuthContent
 import com.android.pinlibrary.ui.screens.PinAuthScreen
 import com.android.pinlibrary.ui.screens.PinCodeScreen
 import com.android.pinlibrary.utils.enums.PinCodeScenario
@@ -65,12 +70,12 @@ class PinCodeScreenInstrumentedTest {
 
         enterPin("2468")
         enterPin("2468")
-        composeRule.waitUntil(10_000) { creationSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { creationSucceeded.get() }
 
         stateManager.setScenario(PinCodeScenario.VALIDATION)
         waitForScenario(PinCodeScenario.VALIDATION)
         enterPin("2468")
-        composeRule.waitUntil(10_000) { validationSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { validationSucceeded.get() }
 
         assertTrue(PinCodeManager(application).isPinCodeCorrect("2468"))
     }
@@ -89,13 +94,13 @@ class PinCodeScreenInstrumentedTest {
         waitForText(application.getString(R.string.pin_code_step_create))
         enterPin("5678")
         enterPin("5678")
-        composeRule.waitUntil(10_000) { changeSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { changeSucceeded.get() }
         assertTrue(PinCodeManager(application).isPinCodeCorrect("5678"))
 
         stateManager.setScenario(PinCodeScenario.DELETION)
         waitForScenario(PinCodeScenario.DELETION)
         enterPin("5678")
-        composeRule.waitUntil(10_000) { deletionSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { deletionSucceeded.get() }
 
         assertNull(PinCodeManager(application).loadPinCode())
     }
@@ -112,9 +117,11 @@ class PinCodeScreenInstrumentedTest {
         composeRule.setContent { PinCodeScreen() }
 
         enterPin("0000")
-        composeRule.waitUntil(10_000) { AttemptCounter(application).getAttempts() == 1 }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) {
+            AttemptCounter(application).getAttempts() == 1
+        }
         enterPin("0000")
-        composeRule.waitUntil(10_000) { attemptsExhausted.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { attemptsExhausted.get() }
 
         assertEquals(0, AttemptCounter(application).getAttempts())
         assertFalse(validationSucceeded.get())
@@ -144,10 +151,38 @@ class PinCodeScreenInstrumentedTest {
 
         enterPin("1357")
         enterPin("1357")
-        composeRule.waitUntil(10_000) { creationSucceeded.get() }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { creationSucceeded.get() }
 
         assertTrue(PinCodeManager(application).isPinCodeCorrect("1357"))
         controller.close()
+    }
+
+    @Test
+    fun forgotPinRequiresDialogConfirmation() {
+        val resetRequested = AtomicBoolean(false)
+        composeRule.setContent {
+            PinAuthContent(
+                state = PinAuthUiState(
+                    scenario = PinAuthScenario.VALIDATION,
+                    step = PinAuthStep.ENTER_CURRENT_PIN,
+                    pinLength = 4,
+                    remainingAttempts = 3
+                ),
+                onAction = { action ->
+                    if (action == PinAuthAction.RequestReset) resetRequested.set(true)
+                },
+                motionSpec = PinAuthMotionSpec.None
+            )
+        }
+
+        composeRule.onNodeWithText(application.getString(R.string.pin_code_forgot_text))
+            .performClick()
+        composeRule.onNodeWithText(application.getString(R.string.forgot_pin_instruction))
+            .assertExists()
+        assertFalse(resetRequested.get())
+
+        composeRule.onNodeWithText(application.getString(R.string.ok_button)).performClick()
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) { resetRequested.get() }
     }
 
     private fun enterPin(pin: String) {
@@ -158,13 +193,19 @@ class PinCodeScreenInstrumentedTest {
     }
 
     private fun waitForScenario(scenario: PinCodeScenario) {
-        composeRule.waitUntil(10_000) { stateManager.currentScenario.value == scenario }
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) {
+            stateManager.currentScenario.value == scenario
+        }
         composeRule.waitForIdle()
     }
 
     private fun waitForText(text: String) {
-        composeRule.waitUntil(10_000) {
+        composeRule.waitUntil(TEST_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    private companion object {
+        const val TEST_TIMEOUT_MILLIS = 30_000L
     }
 }

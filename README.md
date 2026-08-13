@@ -8,7 +8,18 @@
 
 Library for user authentication using PIN code. This library provides convenient and secure ways to verify users' identities using a simple numeric PIN. It can be used by developers when creating applications that require an additional layer of security or user authentication.
 
-<img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_russian.gif" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_01.png" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_02.png" alt="" width="200px"></a>    <img src="https://github.com/Khokhlinvladimir/android-pin-authentication/blob/main/screens/preview_english_03.png" alt="" width="200px"></a>
+## Motion showcase
+
+<table>
+  <tr>
+    <td align="center"><strong>Create and confirm</strong><br><img src="screens/motion/pin-creation.gif" alt="Creating and confirming a PIN" width="240"></td>
+    <td align="center"><strong>Fast validation</strong><br><img src="screens/motion/pin-validation.gif" alt="Validating a PIN" width="240"></td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Error and recovery</strong><br><img src="screens/motion/pin-error-recovery.gif" alt="PIN error feedback and recovery" width="240"></td>
+    <td align="center"><strong>Confirmed reset</strong><br><img src="screens/motion/pin-reset-dialog.gif" alt="Forgotten PIN confirmation dialog" width="240"></td>
+  </tr>
+</table>
 
 ## Main features
 
@@ -30,7 +41,7 @@ Installing a PIN authentication library is the first step to securely protecting
 
 ```gradle
 dependencies {
-    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v1.0.6'
+    implementation 'com.github.Khokhlinvladimir:android-pin-authentication:v2.0.0-alpha02'
 }
 ```
 With this simple step, you will enable a powerful authentication tool in your application, making it reliable and secure.
@@ -138,7 +149,7 @@ Surface(
 
 These are the basic steps to use the library for PIN authentication in your Android application. Customize the library and handle events according to your needs to create a secure and seamless user experience.
 
-## Experimental controller API (2.0.0-alpha01)
+## Experimental controller API (2.0.0-alpha02)
 
 The new API is state-driven, does not depend on the process-global `PinCodeStateManager`, and can be tested with custom stores. The legacy API above remains available during migration.
 
@@ -149,7 +160,7 @@ val controller = remember {
         PinAuthConfig(
             pinLength = 4,
             maxAttempts = 5,
-            biometricEnabled = false,
+            biometricEnabled = true,
             autoLaunchBiometric = false
         )
     )
@@ -158,6 +169,7 @@ val controller = remember {
 PinAuthScreen(
     controller = controller,
     scenario = PinAuthScenario.VALIDATION,
+    motionSpec = PinAuthMotionSpec.Premium,
     onResult = { result ->
         when (result) {
             PinAuthResult.Validated -> openProtectedContent()
@@ -169,15 +181,15 @@ PinAuthScreen(
 )
 ```
 
-`PinAuthController.state` exposes immutable `StateFlow<PinAuthUiState>`. Terminal events are delivered through `results`, while `dispatch` accepts typed digit, backspace, and reset actions. Biometric support for this entry point will be added in a later alpha.
+`PinAuthController.state` exposes immutable `StateFlow<PinAuthUiState>`. Terminal events are delivered through `results`, while `dispatch` accepts typed digit, backspace, biometric, and reset actions. `PinAuthMotionSpec.Premium` enables animated dots, step transitions, error shake, processing pulse, success feedback, keypad press motion, haptics, and the ambient background. Use `PinAuthMotionSpec.None` for a fully static surface, or copy `Premium` to customize individual timings and effects. When enabled and enrolled on the device, biometrics are available during PIN validation. Forgotten-PIN recovery is emitted only after the user confirms the dialog.
 
 ## Security and migration notes
 
-- Version 1.0.6 stores a versioned PBKDF2 verifier with a random per-PIN salt. Existing SHA-256 records are migrated automatically after the first successful validation.
+- New PIN records use an HMAC verifier protected by a non-exportable Android Keystore key. Existing PBKDF2 and legacy SHA-256 records are migrated automatically after their first successful validation.
 - PIN verification and storage run off the Compose UI thread.
 - When the configured attempt limit is exhausted, PIN input stays locked across process restarts. The host application must provide recovery through `onResetPassword` and `clearConfiguration`.
 - PIN length must be between 4 and 12 digits. The maximum attempt count must be between 1 and 100.
-- A local PIN is an application lock, not a replacement for server-side authentication. Applications storing sensitive data should additionally protect cryptographic keys with Android Keystore and exclude PIN-related preferences from backup.
+- A local PIN is an application lock, not a replacement for server-side authentication. Applications storing sensitive data should also exclude PIN-related preferences from backup.
 
 ## Technical specifications:
 
